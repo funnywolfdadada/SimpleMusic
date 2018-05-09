@@ -8,16 +8,24 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection{
 
     private static final int FILE_SELECT_CODE = 0;
     private MusicController musicController;
     private MusicControl musicControlBinder;
+
+    private ListView listView;
+    private List<String> mArrayList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +44,19 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             }
         });
 
+        listView = findViewById(R.id.music_list);
+        for(int i = 0; i < 100; i++) {
+            mArrayList.add("第" + i + "个View");
+        }
+        ListViewAdapter adapter = new ListViewAdapter(this, mArrayList);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, mArrayList.get(position),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void chooseFile() {

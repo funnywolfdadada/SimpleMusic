@@ -7,14 +7,21 @@
     android:layout_height="match_parent"
     tools:context="com.funnywolf.simplemusic.MainActivity">
 
-    <Button
-        android:id="@+id/select_file"
-        android:text="Select file"
+    <ListView
+        android:id="@+id/music_list"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"></ListView>
 
     <include
         android:id="@+id/panel"
         layout="@layout/panel_layout"/>
+
+    <Button
+        android:id="@+id/select_file"
+        android:text="Select file"
+        android:layout_weight="0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
