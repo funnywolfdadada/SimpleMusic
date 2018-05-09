@@ -7,6 +7,7 @@ package com.funnywolf.simplemusic;
 public class MusicItem {
     private String name;
     private String author;
+    private String path;
 
     public void setName(String name) {
         this.name = name;
