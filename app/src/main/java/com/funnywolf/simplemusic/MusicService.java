@@ -47,6 +47,12 @@ public class MusicService extends Service {
         }
 
         @Override
+        public void stop() {
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+        }
+
+        @Override
         public void pause() {
             mediaPlayer.pause();
         }

@@ -54,7 +54,7 @@ public class ListViewAdapter extends BaseAdapter {
         return convertView;
     }
 
-    static class ViewHolder {
+    private class ViewHolder {
         private TextView mTextView;
     }
 }

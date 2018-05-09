@@ -9,6 +9,7 @@ public interface MusicControl {
         LIST_LOOP_MODE, RANDOM_MODE, SINGLE_LOOP_MODE
     };
     boolean play(String path);
+    void stop();
     void start();
     void pause();
     void next();

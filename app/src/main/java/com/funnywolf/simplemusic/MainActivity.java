@@ -3,10 +3,13 @@ package com.funnywolf.simplemusic;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -20,12 +23,17 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection{
 
+    private static final String TAG = "MainActivity";
+
     private static final int FILE_SELECT_CODE = 0;
     private MusicController musicController;
-    private MusicControl musicControlBinder;
 
     private ListView listView;
     private List<String> mArrayList = new ArrayList<String>();
+
+    private ListView mMusicListView;
+    private MusicItemAdapter musicItemAdapter;
+    private List<MusicItem> mMusicList = new ArrayList<MusicItem>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             }
         });
 
+        /*
         listView = findViewById(R.id.music_list);
         for(int i = 0; i < 100; i++) {
             mArrayList.add("第" + i + "个View");
@@ -57,6 +66,51 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         Toast.LENGTH_SHORT).show();
             }
         });
+        */
+        mMusicListView = findViewById(R.id.music_list);
+        mMusicList = getAllMusic();
+        for(MusicItem m : mMusicList){
+            Log.d(TAG, "onCreate: " + m);
+        }
+        musicItemAdapter = new MusicItemAdapter(this, mMusicList);
+        mMusicListView.setAdapter(musicItemAdapter);
+        mMusicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Toast.makeText(MainActivity.this, mMusicList.get(position).toString(),
+                //        Toast.LENGTH_SHORT).show();
+                if(musicController != null) {
+                    musicController.play(mMusicList.get(position).getPath());
+                }
+            }
+        });
+    }
+
+    private ArrayList<MusicItem> getAllMusic() {
+        ArrayList<MusicItem> list = new ArrayList<MusicItem>();
+        Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                null, null, null,
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        if(cursor.moveToFirst()){
+            while(!cursor.isAfterLast()){
+                String name = cursor.getString(
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
+                String title = cursor.getString(
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                String artist = cursor.getString(
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                String path = cursor.getString(
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                int duration = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                Long size = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                list.add(new MusicItem(name, title, artist, path, duration, size));
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return list;
     }
 
     private void chooseFile() {
@@ -72,9 +126,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        musicControlBinder = (MusicControl)service;
-        musicController = new MusicController(musicControlBinder);
-        musicController.play(Environment.getExternalStorageDirectory().getPath() + "/music.mp3");
+        musicController = new MusicController((MusicControl)service);
+        //musicController.play(Environment.getExternalStorageDirectory().getPath() + "music.mp3");
     }
 
     @Override
@@ -116,16 +169,30 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         @Override
         public boolean play(String path) {
-            return musicControlBinder.play(path);
+            boolean playOk;
+            musicController.stop();
+            playOk = musicControlBinder.play(path);
+            musicController.start();
+            return playOk;
+        }
+
+        @Override
+        public void stop() {
+            pause();
+            musicControlBinder.stop();
         }
 
         @Override
         public void start() {
+            playing = true;
+            panelStartStop.setText("PAUSE");
             musicControlBinder.start();
         }
 
         @Override
         public void pause() {
+            playing = false;
+            panelStartStop.setText("START");
             musicControlBinder.pause();
         }
 
@@ -141,6 +208,22 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         @Override
         public void changeMode(PlayMode mode) {
+            switch (playMode){
+                case LIST_LOOP_MODE:
+                    playMode = PlayMode.RANDOM_MODE;
+                    panelMode.setText("R");
+                    break;
+                case RANDOM_MODE:
+                    playMode = PlayMode.SINGLE_LOOP_MODE;
+                    panelMode.setText("S");
+                    break;
+                case SINGLE_LOOP_MODE:
+                    playMode = PlayMode.LIST_LOOP_MODE;
+                    panelMode.setText("L");
+                    break;
+                default:
+                    break;
+            }
             musicControlBinder.changeMode(mode);
         }
 
@@ -171,22 +254,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         public void onClick(View v) {
             switch (v.getId()){
             case R.id.panel_mode:
-                switch (playMode){
-                case LIST_LOOP_MODE:
-                    playMode = PlayMode.RANDOM_MODE;
-                    panelMode.setText("R");
-                    break;
-                case RANDOM_MODE:
-                    playMode = PlayMode.SINGLE_LOOP_MODE;
-                    panelMode.setText("S");
-                    break;
-                case SINGLE_LOOP_MODE:
-                    playMode = PlayMode.LIST_LOOP_MODE;
-                    panelMode.setText("L");
-                    break;
-                default:
-                    break;
-                }
                 changeMode(playMode);
                 break;
             case R.id.panel_prev:
@@ -194,13 +261,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 break;
             case R.id.panel_start_stop:
                 if (playing) {
-                    playing = false;
                     pause();
-                    panelStartStop.setText("START");
                 }else {
-                    playing = true;
                     start();
-                    panelStartStop.setText("PAUSE");
                 }
                 break;
             case R.id.panel_next:
