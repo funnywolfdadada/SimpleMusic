@@ -9,8 +9,8 @@ public class MusicItem {
     private String artist;
     private String title;
     private String path;
-    int duration;
-    long size;
+    private int duration;
+    private long size;
 
     public MusicItem(){}
     public MusicItem(String name, String title, String artist, String path, int duration, long size){
@@ -69,7 +69,7 @@ public class MusicItem {
     }
 
     public String toString() {
-        return String.format("name: %s, title: %s, artist: %s, duration: %d, size: %d, path: %s"
-                , name, title, artist, duration, size, path);
+        return String.format("name: %s, title: %s, artist: %s, duration: %d, size: %d, path: %s",
+                name, title, artist, duration, size, path);
     }
 }

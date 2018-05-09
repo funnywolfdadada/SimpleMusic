@@ -8,12 +8,15 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MusicService extends Service {
     private static final String TAG = "MusicService";
 
     private MusicControlBinder musicControlBinder;
     private MediaPlayer mediaPlayer;
+
 
     @Override
     public void onCreate() {
@@ -28,17 +31,20 @@ public class MusicService extends Service {
     }
 
     public class MusicControlBinder extends Binder implements MusicControl{
+
+        private List<MusicItem> mMusicList;
+        private int currentPosition;
+
         @Override
-        public boolean play(String path) {
-            Log.d(TAG, "play: " + path);
+        public void play(List<MusicItem> list, int position) {
+            mMusicList = list;
+            currentPosition = position;
             try {
-                mediaPlayer.setDataSource(path);
+                mediaPlayer.setDataSource(mMusicList.get(currentPosition).getPath());
                 mediaPlayer.prepare();
-                return true;
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return false;
         }
 
         @Override

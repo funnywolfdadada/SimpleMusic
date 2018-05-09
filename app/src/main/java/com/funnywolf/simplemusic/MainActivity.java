@@ -25,14 +25,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     private static final String TAG = "MainActivity";
 
-    private static final int FILE_SELECT_CODE = 0;
     private MusicController musicController;
 
-    private ListView listView;
-    private List<String> mArrayList = new ArrayList<String>();
-
+    private TextView mListTitle;
     private ListView mMusicListView;
-    private MusicItemAdapter musicItemAdapter;
+    private MusicItemAdapter mMusicItemAdapter;
     private List<MusicItem> mMusicList = new ArrayList<MusicItem>();
 
     @Override
@@ -44,46 +41,20 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         startService(intent);
         bindService(intent, this, BIND_AUTO_CREATE);
 
-        Button selectFile = findViewById(R.id.select_file);
-        selectFile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chooseFile();
-            }
-        });
-
-        /*
-        listView = findViewById(R.id.music_list);
-        for(int i = 0; i < 100; i++) {
-            mArrayList.add("第" + i + "个View");
-        }
-        ListViewAdapter adapter = new ListViewAdapter(this, mArrayList);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, mArrayList.get(position),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-        */
         mMusicListView = findViewById(R.id.music_list);
         mMusicList = getAllMusic();
-        for(MusicItem m : mMusicList){
-            Log.d(TAG, "onCreate: " + m);
-        }
-        musicItemAdapter = new MusicItemAdapter(this, mMusicList);
-        mMusicListView.setAdapter(musicItemAdapter);
+        mMusicItemAdapter = new MusicItemAdapter(this, mMusicList);
+        mMusicListView.setAdapter(mMusicItemAdapter);
         mMusicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Toast.makeText(MainActivity.this, mMusicList.get(position).toString(),
-                //        Toast.LENGTH_SHORT).show();
                 if(musicController != null) {
-                    musicController.play(mMusicList.get(position).getPath());
+                    musicController.play(mMusicList, position);
                 }
             }
         });
+        mListTitle = findViewById(R.id.list_title);
+        mListTitle.setText("Total: " + mMusicList.size());
     }
 
     private ArrayList<MusicItem> getAllMusic() {
@@ -91,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, null, null,
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if(cursor.moveToFirst()){
+        if(cursor != null && cursor.moveToFirst()){
             while(!cursor.isAfterLast()){
                 String name = cursor.getString(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
@@ -108,26 +79,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 list.add(new MusicItem(name, title, artist, path, duration, size));
                 cursor.moveToNext();
             }
+            cursor.close();
         }
-        cursor.close();
         return list;
-    }
-
-    private void chooseFile() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        try {
-            startActivityForResult(Intent.createChooser(intent, "选择文件"), FILE_SELECT_CODE);
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(this, "亲，木有文件管理器啊-_-!!", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         musicController = new MusicController((MusicControl)service);
-        //musicController.play(Environment.getExternalStorageDirectory().getPath() + "music.mp3");
     }
 
     @Override
@@ -168,12 +127,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
 
         @Override
-        public boolean play(String path) {
-            boolean playOk;
-            musicController.stop();
-            playOk = musicControlBinder.play(path);
-            musicController.start();
-            return playOk;
+        public void play(List<MusicItem> list, int position) {
+            stop();
+            musicControlBinder.play(list, position);
+            start();
         }
 
         @Override
