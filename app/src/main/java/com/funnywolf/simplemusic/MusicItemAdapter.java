@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.Inflater;
 
 /**
@@ -18,7 +19,6 @@ public class MusicItemAdapter extends BaseAdapter {
 
     private List<MusicItem> mList;
     private LayoutInflater mLayoutInflater;
-    private ViewHolder mViewHolder;
 
     public MusicItemAdapter(Context context, List<MusicItem> list) {
         mList = list;
@@ -42,27 +42,27 @@ public class MusicItemAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
+        ViewHolder viewHolder;
         if(view == null) {
             view = mLayoutInflater.inflate(R.layout.music_item, null);
-            mViewHolder = new ViewHolder();
-            mViewHolder.musicTitle = view.findViewById(R.id.music_title);
-            mViewHolder.musicArtist = view.findViewById(R.id.music_artist);
-            mViewHolder.musicName = view.findViewById(R.id.music_name);
-            mViewHolder.musicDuration = view.findViewById(R.id.music_duration);
-            mViewHolder.musicSize = view.findViewById(R.id.music_size);
-            view.setTag(mViewHolder);
+            viewHolder = new ViewHolder();
+            viewHolder.musicTitle = view.findViewById(R.id.music_title);
+            viewHolder.musicArtist = view.findViewById(R.id.music_artist);
+            viewHolder.musicName = view.findViewById(R.id.music_name);
+            viewHolder.musicDuration = view.findViewById(R.id.music_duration);
+            viewHolder.musicSize = view.findViewById(R.id.music_size);
+            view.setTag(viewHolder);
         }else {
-            mViewHolder = (ViewHolder)view.getTag();
+            viewHolder = (ViewHolder)view.getTag();
         }
 
         MusicItem music = mList.get(i);
-        mViewHolder.musicTitle.setText((i + 1) + ": " + music.getTitle());
-        mViewHolder.musicArtist.setText(music.getArtist());
-        mViewHolder.musicName.setText(music.getName());
-        int duration = music.getDuration() / 1000;
-        mViewHolder.musicDuration.setText(duration / 60 + ":" + duration % 60);
-        long size = music.getSize();
-        mViewHolder.musicSize.setText(size/1024/1024+"MB");
+        viewHolder.musicTitle.setText(String.format(Locale.getDefault(),
+                "%d: %s", (i + 1), music.title));
+        viewHolder.musicArtist.setText(music.artist);
+        viewHolder.musicName.setText(music.name);
+        viewHolder.musicDuration.setText(music.duration);
+        viewHolder.musicSize.setText(music.size);
 
         return view;
     }

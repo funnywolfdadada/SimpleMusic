@@ -1,75 +1,39 @@
 package com.funnywolf.simplemusic;
 
+import java.util.Locale;
+
 /**
  * Created by funnywolf on 18-5-7.
  */
 
 public class MusicItem {
-    private String name;
-    private String artist;
-    private String title;
-    private String path;
-    private int duration;
-    private long size;
+    public final String name;
+    public final String artist;
+    public final String title;
+    public final String path;
+    public final String duration;
+    public final int durationInt;
+    public final String size;
 
-    public MusicItem(){}
+    public int currentTime;
+
     public MusicItem(String name, String title, String artist, String path, int duration, long size){
         this.name = name;
         this.title = title;
         this.artist = artist;
         this.path = path;
-        this.duration = duration;
-        this.size =size;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getName() {
-        return name;
-    }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
-    public String getArtist() {
-        return artist;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public long getSize() {
-        return size;
+        durationInt = duration;
+        duration /= 1000;
+        this.duration = String.format(Locale.getDefault(),
+                "%d:%02d", duration / 60, duration % 60);
+        this.size = String.format(Locale.getDefault(),
+                "%.2fMB", size / 1024d / 1024d);
+        currentTime = 0;
     }
 
     public String toString() {
-        return String.format("name: %s, title: %s, artist: %s, duration: %d, size: %d, path: %s",
+        return String.format(Locale.getDefault(),
+                "name: %s, title: %s, artist: %s, duration: %s, size: %s, path: %s",
                 name, title, artist, duration, size, path);
     }
 }

@@ -10,7 +10,7 @@
     <ImageView
         android:id="@+id/background"
         android:scaleType="fitCenter"
-        android:background="@drawable/background"
+        android:background="#FFF"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <LinearLayout
@@ -23,14 +23,12 @@
             android:textSize="20sp"
             android:textColor="#fff"
             android:background="#8000"
-            android:layout_margin="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <ListView
             android:id="@+id/music_list"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_margin="5dp"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="0dp" />

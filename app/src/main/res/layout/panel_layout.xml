@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_margin="10dp"
     android:background="#8000"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -13,8 +12,8 @@
 
         <TextView
             android:id="@+id/panel_title"
-            android:text="title"
-            android:textSize="30sp"
+            android:text="---"
+            android:textSize="20sp"
             android:textColor="#fff"
             android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
@@ -22,9 +21,11 @@
 
         <TextView
             android:id="@+id/panel_author"
-            android:text="author"
-            android:textSize="20sp"
+            android:text="---"
+            android:textSize="10sp"
             android:textColor="#fff"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:layout_toRightOf="@id/panel_title"
             android:layout_toEndOf="@id/panel_title"
             android:layout_alignBottom="@id/panel_title"
@@ -56,7 +57,7 @@
             android:layout_height="match_parent" />
 
         <TextView
-            android:id="@+id/panel_total_time"
+            android:id="@+id/panel_duration"
             android:text="00:00"
             android:textColor="#fff"
             android:layout_weight="0"

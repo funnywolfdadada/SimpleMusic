@@ -17,7 +17,6 @@ public class MusicService extends Service {
     private MusicControlBinder musicControlBinder;
     private MediaPlayer mediaPlayer;
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -34,13 +33,19 @@ public class MusicService extends Service {
 
         private List<MusicItem> mMusicList;
         private int currentPosition;
+        private PlayMode playMode = PlayMode.LIST_LOOP_MODE;
 
         @Override
         public void play(List<MusicItem> list, int position) {
+            if (list == null || position < 0 || position >= list.size())
+                return;
+            mediaPlayer.reset();
             mMusicList = list;
             currentPosition = position;
             try {
-                mediaPlayer.setDataSource(mMusicList.get(currentPosition).getPath());
+                MusicItem music = mMusicList.get(currentPosition);
+                music.currentTime = 0;
+                mediaPlayer.setDataSource(music.path);
                 mediaPlayer.prepare();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -53,49 +58,81 @@ public class MusicService extends Service {
         }
 
         @Override
-        public void stop() {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
-        }
-
-        @Override
         public void pause() {
             mediaPlayer.pause();
         }
 
         @Override
         public void next() {
-
+            if (mMusicList == null)
+                return;
+            switch (playMode) {
+                case LIST_LOOP_MODE:
+                    break;
+                case RANDOM_MODE:
+                    break;
+                case SINGLE_LOOP_MODE:
+                    break;
+                default:
+                    break;
+            }
+            if(currentPosition < mMusicList.size() - 1)
+                currentPosition += 1;
+            else
+                currentPosition = 0;
+            play(mMusicList, currentPosition);
+            start();
         }
 
         @Override
         public void prev() {
+            if (mMusicList == null)
+                return;
+            switch (playMode) {
+                case LIST_LOOP_MODE:
+                    playMode = PlayMode.RANDOM_MODE;
+                    break;
+                case RANDOM_MODE:
+                    playMode = PlayMode.SINGLE_LOOP_MODE;
+                    break;
+                case SINGLE_LOOP_MODE:
+                    playMode = PlayMode.LIST_LOOP_MODE;
+                    break;
+                default:
 
+            }
+            if(currentPosition != 0)
+                currentPosition -= 1;
+            else
+                currentPosition = mMusicList.size() - 1;
+            play(mMusicList, currentPosition);
+            start();
         }
 
         @Override
-        public void changeMode(PlayMode mode) {
-
+        public PlayMode getMode() {
+            return playMode;
         }
 
         @Override
-        public int getCurrentPosition() {
-            return 0;
-        }
-
-        @Override
-        public int getDuration() {
-            return 0;
+        public void setMode(PlayMode mode) {
+            playMode = mode;
         }
 
         @Override
         public void seekTo(int msec) {
-
+            MusicItem music = mMusicList.get(currentPosition);
+            music.currentTime = msec * music.durationInt / 100;
+            mediaPlayer.seekTo(music.currentTime);
         }
 
         @Override
         public MusicItem getCurrentMusic() {
-            return null;
+            if(mMusicList == null)
+                return null;
+            MusicItem music = mMusicList.get(currentPosition);
+            music.currentTime = mediaPlayer.getCurrentPosition();
+            return music;
         }
     }
 }
