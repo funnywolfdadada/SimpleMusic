@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -23,9 +24,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection{
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "Music";
 
-    private MusicController musicController;
+    private MusicPanel musicPanel;
+    private UpdatePanelTask updatePanelTask;
 
     private TextView mListTitle;
     private ListView mMusicListView;
@@ -48,13 +50,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         mMusicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(musicController != null) {
-                    musicController.play(mMusicList, position);
+                if(musicPanel != null) {
+                    musicPanel.play(mMusicList, position);
                 }
             }
         });
         mListTitle = findViewById(R.id.list_title);
         mListTitle.setText("Total: " + mMusicList.size());
+
     }
 
     private ArrayList<MusicItem> getAllMusic() {
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        musicController = new MusicController(MainActivity.this, (MusicControl)service);
+        musicPanel = MusicPanel.getInstance(MainActivity.this, (MusicControl)service);
     }
 
     @Override
@@ -94,5 +97,38 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        updatePanelTask = new UpdatePanelTask();
+        updatePanelTask.execute();
+    }
+
+    @Override
+    protected void onStop() {
+        updatePanelTask.cancel(true);
+        super.onStop();
+    }
+
+    class UpdatePanelTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            while(!isCancelled()) {
+                try {
+                    Thread.sleep(1000);
+                    publishProgress();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            if(musicPanel != null)
+                musicPanel.updatePanel();
+        }
+    }
 
 }

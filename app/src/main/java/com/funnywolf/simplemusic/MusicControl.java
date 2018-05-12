@@ -19,8 +19,9 @@ public interface MusicControl {
     void prev();
 
     void setMode(PlayMode mode);
-    PlayMode getMode();
-
-    MusicItem getCurrentMusic();
     void seekTo(int msec);
+
+    PlayMode getMode();
+    MusicItem getCurrentMusic();
+    boolean isPlaying();
 }

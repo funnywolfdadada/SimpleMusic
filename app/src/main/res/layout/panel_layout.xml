@@ -50,6 +50,7 @@
 
         <SeekBar
             android:id="@+id/panel_seek_bar"
+
             android:max="100"
             android:progress="0"
             android:layout_weight="1"
@@ -72,8 +73,7 @@
         <Button
             android:id="@+id/panel_mode"
             android:text="L"
-            android:textSize="15sp"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:layout_alignTop="@id/panel_start_stop"
             android:layout_width="40dp"
@@ -81,31 +81,28 @@
 
         <Button
             android:id="@+id/panel_prev"
-            android:text="prev"
-            android:textSize="15sp"
+            android:background="@drawable/prev"
             android:layout_alignTop="@id/panel_start_stop"
-            android:layout_toLeftOf="@id/panel_start_stop"
             android:layout_toStartOf="@id/panel_start_stop"
-            android:layout_width="80dp"
-            android:layout_height="40dp" />
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
         <Button
             android:id="@+id/panel_start_stop"
-            android:text="start"
-            android:textSize="15sp"
+            android:background="@drawable/start"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_centerInParent="true"
-            android:layout_width="80dp"
-            android:layout_height="40dp" />
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
         <Button
             android:id="@+id/panel_next"
-            android:text="next"
-            android:textSize="15sp"
+            android:background="@drawable/next"
             android:layout_alignTop="@id/panel_start_stop"
-            android:layout_toRightOf="@id/panel_start_stop"
             android:layout_toEndOf="@id/panel_start_stop"
-            android:layout_width="80dp"
-            android:layout_height="40dp" />
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
     </RelativeLayout>
 </LinearLayout>
