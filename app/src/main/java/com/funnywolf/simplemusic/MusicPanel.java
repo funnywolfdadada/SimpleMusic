@@ -20,7 +20,7 @@ public class MusicPanel implements View.OnClickListener,
     private SeekBar panelSeekBar;
     private Button panelMode, panelPrev, panelStartStop, panelNext;
 
-    private MusicPanel(Activity activity, MusicControl controller) {
+    public MusicPanel(Activity activity, MusicControl controller) {
         musicController = controller;
 
         panelTitle = activity.findViewById(R.id.panel_title);
@@ -43,16 +43,9 @@ public class MusicPanel implements View.OnClickListener,
         updatePanel();
     }
 
-    private static MusicPanel mMusicPanel = null;
-    public static MusicPanel getInstance(Activity activity, MusicControl controller) {
-        if(mMusicPanel == null) {
-            mMusicPanel = new MusicPanel(activity, controller);
-        }
-        return mMusicPanel;
-    }
-
     public void play(List<MusicItem> list, int position) {
         musicController.play(list, position);
+        musicController.start();
         updatePanel();
     }
 
@@ -68,8 +61,8 @@ public class MusicPanel implements View.OnClickListener,
                     "%d:%02d", currentTime / 60, currentTime % 60));
             panelSeekBar.setProgress(100 * music.currentTime / music.durationInt);
         } else {
-            panelTitle.setText("---");
-            panelArtist.setText("---");
+            panelTitle.setText("------");
+            panelArtist.setText("------");
             panelDuration.setText("00:00");
             panelCurrentTime.setText("00:00");
             panelSeekBar.setProgress(0);

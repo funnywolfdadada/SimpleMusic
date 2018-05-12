@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private TextView mListTitle;
     private ListView mMusicListView;
     private MusicItemAdapter mMusicItemAdapter;
-    private List<MusicItem> mMusicList = new ArrayList<MusicItem>();
+    private List<MusicItem> mMusicList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +89,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        musicPanel = MusicPanel.getInstance(MainActivity.this, (MusicControl)service);
+        if(musicPanel == null)
+            musicPanel = new MusicPanel(MainActivity.this, (MusicControl)service);
     }
 
     @Override

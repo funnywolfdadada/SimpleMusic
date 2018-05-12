@@ -25,40 +25,61 @@ public class MusicService extends Service {
     private static final String NOTIFICATION_ID = "MusicService";
 
     private MusicControlBinder mMusicControlBinder;
-    private NotificationManager mNotificationManager;
     private RemoteViews mRemoteViews;
+    private Notification mNotification;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationChannel channel = new NotificationChannel(NOTIFICATION_ID, "music",
-                NotificationManager.IMPORTANCE_HIGH);
-        mNotificationManager.createNotificationChannel(channel);
+                NotificationManager.IMPORTANCE_DEFAULT);
+        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
+                .createNotificationChannel(channel);
 
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         mRemoteViews = new RemoteViews(this.getPackageName(), R.layout.notification_layout);
-        mRemoteViews.setTextViewText(R.id.panel_title, "44445454");
-        mRemoteViews.setInt(R.id.panel_start_stop,"setBackgroundResource",
-                R.drawable.pause);
-        Notification nt = new NotificationCompat.Builder(this, NOTIFICATION_ID)
+        mNotification = new NotificationCompat.Builder(this, NOTIFICATION_ID)
                 .setContentTitle("SimpleMusic")
                 .setContent(mRemoteViews)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(pi)
+                .setContentIntent(pendingIntent)
+                .setSound(null)
                 .build();
-        startForeground(1, nt);
-
+        startForeground(1, mNotification);
     }
 
     @Override
     public void onDestroy() {
         stopForeground(true);
         super.onDestroy();
+    }
+
+    private void updateNotification() {
+        MusicItem music = null;
+        boolean playing = false;
+
+        if(mMusicControlBinder != null) {
+            music = mMusicControlBinder.getCurrentMusic();
+            playing = mMusicControlBinder.isPlaying();
+        }
+        if(music != null) {
+            mRemoteViews.setTextViewText(R.id.panel_title, music.title);
+            mRemoteViews.setTextViewText(R.id.panel_artist, music.artist);
+        }else {
+            mRemoteViews.setTextViewText(R.id.panel_title, "------");
+            mRemoteViews.setTextViewText(R.id.panel_artist, "------");
+        }
+        if(playing) {
+            mRemoteViews.setInt(R.id.panel_start_stop, "setBackgroundResource",
+                    R.drawable.pause);
+        }else {
+            mRemoteViews.setInt(R.id.panel_start_stop, "setBackgroundResource",
+                    R.drawable.start);
+        }
+        startForeground(1, mNotification);
     }
 
     @Override
@@ -95,6 +116,7 @@ public class MusicService extends Service {
             isReady = false;
             isPlaying = false;
             mMediaPlayer.reset();
+            updateNotification();
             return true;
         }
 
@@ -103,6 +125,7 @@ public class MusicService extends Service {
             currentPosition = updatePosition(playMode, mMusicList.size(), currentPosition,
                     true);
             play(mMusicList, currentPosition);
+            start();
         }
 
         /**
@@ -124,9 +147,10 @@ public class MusicService extends Service {
                 mMediaPlayer.setDataSource(music.path);
                 mMediaPlayer.prepare();
                 isReady = true;
-                start();
             } catch (IOException e) {
                 e.printStackTrace();
+            }finally {
+                updateNotification();
             }
         }
 
@@ -136,6 +160,7 @@ public class MusicService extends Service {
                 return;
             isPlaying = true;
             mMediaPlayer.start();
+            updateNotification();
         }
 
         @Override
@@ -144,6 +169,7 @@ public class MusicService extends Service {
                 return;
             isPlaying = false;
             mMediaPlayer.pause();
+            updateNotification();
         }
 
         @Override
@@ -153,6 +179,7 @@ public class MusicService extends Service {
             currentPosition = updatePosition(playMode, mMusicList.size(), currentPosition,
                     true);
             play(mMusicList, currentPosition);
+            start();
         }
 
         @Override
@@ -162,6 +189,7 @@ public class MusicService extends Service {
             currentPosition = updatePosition(playMode, mMusicList.size(), currentPosition,
                     false);
             play(mMusicList, currentPosition);
+            start();
         }
 
         @Override
@@ -198,7 +226,7 @@ public class MusicService extends Service {
             return isPlaying;
         }
 
-        public int updatePosition(PlayMode mode, int size, int p, boolean next) {
+        private int updatePosition(PlayMode mode, int size, int p, boolean next) {
             switch (mode) {
                 case LIST_LOOP_MODE:
                     p = next ? p + 1 : p - 1;
