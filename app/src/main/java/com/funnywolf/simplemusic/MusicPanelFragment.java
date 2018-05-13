@@ -46,7 +46,7 @@ public class MusicPanelFragment extends Fragment
     public void onResume() {
         super.onResume();
         updatePanelTask = new UpdatePanelTask();
-        updatePanelTask.execute();
+        updatePanelTask.execute(this);
     }
 
     @Override
@@ -65,9 +65,14 @@ public class MusicPanelFragment extends Fragment
         updatePanel();
     }
 
-    public void play(List<MusicItem> list, int position) {
+    public void playAndStart(List<MusicItem> list, int position) {
         mMusicController.play(list, position);
         mMusicController.start();
+        updatePanel();
+    }
+
+    public void play(List<MusicItem> list, int position) {
+        mMusicController.play(list, position);
         updatePanel();
     }
 
@@ -168,12 +173,12 @@ public class MusicPanelFragment extends Fragment
         updatePanel();
     }
 
-    class UpdatePanelTask extends AsyncTask<Void, Void, Boolean> {
+    static class UpdatePanelTask extends AsyncTask<MusicPanelFragment, MusicPanelFragment, Boolean> {
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected Boolean doInBackground(MusicPanelFragment... musicPanelFragments) {
             while(!isCancelled()) {
                 try {
-                    publishProgress();
+                    publishProgress(musicPanelFragments);
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -183,9 +188,10 @@ public class MusicPanelFragment extends Fragment
         }
 
         @Override
-        protected void onProgressUpdate(Void... values) {
-            updatePanel();
+        protected void onProgressUpdate(MusicPanelFragment... values) {
+            values[0].updatePanel();
         }
+
     }
 
 
