@@ -17,24 +17,18 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/list_title"
-            android:text="title"
-            android:textSize="20sp"
-            android:textColor="#fff"
-            android:background="#8000"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
-        <ListView
+        <fragment
             android:id="@+id/music_list"
-            android:layout_margin="5dp"
+            android:name="com.funnywolf.simplemusic.MusicListFragment"
             android:layout_weight="1"
             android:layout_width="match_parent"
-            android:layout_height="0dp" />
+            android:layout_height="0dp"/>
 
-        <include
-            android:id="@+id/panel"
-            layout="@layout/panel_layout"/>
+        <fragment
+            android:id="@+id/music_panel"
+            android:name="com.funnywolf.simplemusic.MusicPanelFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </FrameLayout>

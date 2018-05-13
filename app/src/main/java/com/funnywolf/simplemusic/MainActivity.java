@@ -22,17 +22,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection{
+public class MainActivity extends AppCompatActivity
+        implements ServiceConnection, MusicListFragment.MusicListCallback {
 
     private static final String TAG = "Music";
 
     private MusicPanel musicPanel;
     private UpdatePanelTask updatePanelTask;
-
-    private TextView mListTitle;
-    private ListView mMusicListView;
-    private MusicItemAdapter mMusicItemAdapter;
-    private List<MusicItem> mMusicList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,48 +39,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         startService(intent);
         bindService(intent, this, BIND_AUTO_CREATE);
 
-        mMusicListView = findViewById(R.id.music_list);
-        mMusicList = getAllMusic();
-        mMusicItemAdapter = new MusicItemAdapter(this, mMusicList);
-        mMusicListView.setAdapter(mMusicItemAdapter);
-        mMusicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(musicPanel != null) {
-                    musicPanel.play(mMusicList, position);
-                }
-            }
-        });
-        mListTitle = findViewById(R.id.list_title);
-        mListTitle.setText("Total: " + mMusicList.size());
-
-    }
-
-    private ArrayList<MusicItem> getAllMusic() {
-        ArrayList<MusicItem> list = new ArrayList<MusicItem>();
-        Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                null, null, null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if(cursor != null && cursor.moveToFirst()){
-            while(!cursor.isAfterLast()){
-                String name = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
-                String title = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                String artist = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                String path = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                int duration = cursor.getInt(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                Long size = cursor.getLong(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                list.add(new MusicItem(name, title, artist, path, duration, size));
-                cursor.moveToNext();
-            }
-            cursor.close();
-        }
-        return list;
     }
 
     @Override
@@ -109,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onStop() {
         updatePanelTask.cancel(true);
         super.onStop();
+    }
+
+    @Override
+    public void onMusicItemClickListener(List<MusicItem> list, int position) {
+        musicPanel.play(list, position);
     }
 
     class UpdatePanelTask extends AsyncTask<Void, Void, Boolean> {
