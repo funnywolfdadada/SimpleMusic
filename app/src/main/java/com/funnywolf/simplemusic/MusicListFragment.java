@@ -62,7 +62,7 @@ public class MusicListFragment extends Fragment {
                 query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     null, null, null,
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if(cursor != null && cursor.moveToFirst()){
+        if(cursor != null && cursor.moveToFirst()) {
             while(!cursor.isAfterLast()){
                 String name = cursor.getString(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
@@ -85,7 +85,7 @@ public class MusicListFragment extends Fragment {
     }
 
 
-    public static interface MusicListCallback {
+    public interface MusicListCallback {
         void onMusicItemClickListener(List<MusicItem> list, int position);
     }
 }
