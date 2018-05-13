@@ -13,6 +13,7 @@
         <TextView
             android:id="@+id/music_title"
             android:text="title"
+            android:maxLines="1"
             android:textSize="20sp"
             android:textColor="#fff"
             android:layout_gravity="start"
@@ -22,6 +23,7 @@
         <TextView
             android:id="@+id/music_artist"
             android:text="artist"
+            android:maxLines="1"
             android:textColor="#fff"
             android:layout_marginLeft="10dp"
             android:layout_gravity="bottom"
@@ -37,6 +39,7 @@
         <TextView
             android:id="@+id/music_name"
             android:text="name"
+            android:maxLines="1"
             android:textColor="#fff"
             android:layout_gravity="start"
             android:layout_weight="1"

@@ -116,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         protected Boolean doInBackground(Void... voids) {
             while(!isCancelled()) {
                 try {
-                    Thread.sleep(1000);
                     publishProgress();
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

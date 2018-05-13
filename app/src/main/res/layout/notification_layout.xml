@@ -7,26 +7,37 @@
     android:layout_height="70dp">
 
     <RelativeLayout
-        android:orientation="vertical"
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/panel_title"
-            android:text="------"
+            android:id="@+id/title"
+            android:text="@string/app_name"
             android:textSize="20sp"
             android:textColor="#fff"
-            android:layout_alignParentTop="true"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/panel_title"
+            android:text="------"
+            android:maxLines="1"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            android:layout_below="@id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/panel_artist"
             android:text="------"
-            android:textSize="20sp"
+            android:maxLines="1"
+            android:textSize="10sp"
             android:textColor="#fff"
-            android:layout_alignParentBottom="true"
+            android:layout_below="@id/panel_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -47,8 +58,6 @@
         <Button
             android:id="@+id/panel_start_stop"
             android:background="@drawable/start"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
             android:layout_width="50dp"
             android:layout_height="50dp" />
 

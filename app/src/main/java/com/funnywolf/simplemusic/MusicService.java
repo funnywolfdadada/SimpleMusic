@@ -5,13 +5,16 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.RemoteViews;
@@ -21,39 +24,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MusicService extends Service {
+    public static final String ACTION_PREV = "com.funnywolf.simplemusic.MusicService.PREV";
+    public static final String ACTION_START_PAUSE =
+            "com.funnywolf.simplemusic.MusicService.START_PAUSE";
+    public static final String ACTION_NEXT = "com.funnywolf.simplemusic.MusicService.NEXT";
+
     private static final String TAG = "MusicService";
     private static final String NOTIFICATION_ID = "MusicService";
 
     private MusicControlBinder mMusicControlBinder;
     private RemoteViews mRemoteViews;
     private Notification mNotification;
+    private NotificationControlReceiver mReceiver;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        mMusicControlBinder = new MusicControlBinder();
+
+        mReceiver = new NotificationControlReceiver(mMusicControlBinder);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ACTION_PREV);
+        intentFilter.addAction(ACTION_START_PAUSE);
+        intentFilter.addAction(ACTION_NEXT);
+        registerReceiver(mReceiver, intentFilter);
+
         NotificationChannel channel = new NotificationChannel(NOTIFICATION_ID, "music",
-                NotificationManager.IMPORTANCE_DEFAULT);
+                NotificationManager.IMPORTANCE_MIN);
         ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
                 .createNotificationChannel(channel);
 
-        Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
         mRemoteViews = new RemoteViews(this.getPackageName(), R.layout.notification_layout);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
+                new Intent(ACTION_PREV), PendingIntent.FLAG_UPDATE_CURRENT);
+        mRemoteViews.setOnClickPendingIntent(R.id.panel_prev, pendingIntent);
+        pendingIntent = PendingIntent.getBroadcast(this, 0,
+                new Intent(ACTION_START_PAUSE), PendingIntent.FLAG_UPDATE_CURRENT);
+        mRemoteViews.setOnClickPendingIntent(R.id.panel_start_stop, pendingIntent);
+        pendingIntent = PendingIntent.getBroadcast(this, 0,
+                new Intent(ACTION_NEXT), PendingIntent.FLAG_UPDATE_CURRENT);
+        mRemoteViews.setOnClickPendingIntent(R.id.panel_next, pendingIntent);
+
+        pendingIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, MainActivity.class), 0);
         mNotification = new NotificationCompat.Builder(this, NOTIFICATION_ID)
-                .setContentTitle("SimpleMusic")
                 .setContent(mRemoteViews)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .setSound(null)
                 .build();
         startForeground(1, mNotification);
+
     }
 
     @Override
     public void onDestroy() {
         stopForeground(true);
+        unregisterReceiver(mReceiver);
         super.onDestroy();
     }
 
@@ -84,8 +112,6 @@ public class MusicService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        if(mMusicControlBinder == null)
-            mMusicControlBinder = new MusicControlBinder();
         return mMusicControlBinder;
     }
 
@@ -194,8 +220,7 @@ public class MusicService extends Service {
 
         @Override
         public void setMode(PlayMode mode) {
-            if(isReady)
-                playMode = mode;
+            playMode = mode;
         }
 
         @Override
@@ -244,6 +269,40 @@ public class MusicService extends Service {
                     break;
             }
             return p;
+        }
+    }
+
+    class NotificationControlReceiver extends BroadcastReceiver {
+
+        private MusicControl controller;
+
+        public NotificationControlReceiver(MusicControl musicControl) {
+            super();
+            controller = musicControl;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action;
+            if(intent == null || (action = intent.getAction()) == null){
+                return;
+            }
+            switch(action){
+                case ACTION_PREV:
+                    controller.prev();
+                    break;
+                case ACTION_START_PAUSE:
+                    if(controller.isPlaying())
+                        controller.pause();
+                    else
+                        controller.start();
+                    break;
+                case ACTION_NEXT:
+                    controller.next();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
