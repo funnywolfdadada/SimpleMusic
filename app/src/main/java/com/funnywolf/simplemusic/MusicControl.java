@@ -18,10 +18,12 @@ public interface MusicControl {
     void next();
     void prev();
 
+    PlayMode getMode();
     void setMode(PlayMode mode);
+
+    int getPosition();
+    MusicItem getCurrentMusic();
     void seekTo(int msec);
 
-    PlayMode getMode();
-    MusicItem getCurrentMusic();
     boolean isPlaying();
 }

@@ -64,7 +64,7 @@
             android:layout_height="50dp" />
 
         <Button
-            android:id="@+id/panel_start_stop"
+            android:id="@+id/panel_play_pause"
             android:background="@drawable/start"
             android:layout_width="50dp"
             android:layout_height="50dp" />

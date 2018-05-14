@@ -20,13 +20,16 @@ import java.io.IOException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements ServiceConnection, MusicListFragment.MusicListCallback {
+        implements ServiceConnection, MusicListFragment.MusicListCallback,
+        MusicPanelFragment.MusicPanelCallback {
 
     private static final String TAG = "SimpleMusic";
 
     private FragmentManager mFragmentManager;
     private MusicPanelFragment mMusicPanelFragment;
     private MusicListFragment mMusicListFragment;
+
+    private MusicControl mMusicController;
 
     private ImageView mImageView;
 
@@ -49,9 +52,12 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    /**
+     * for ServiceConnection
+     */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mMusicPanelFragment.setMusicController((MusicControl) service);
+        mMusicController = ((MusicControl) service);
     }
 
     @Override
@@ -59,13 +65,20 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    /**
+     * for MusicListFragment.MusicListCallback
+     */
     @Override
-    public void onMusicItemClickListener(List<MusicItem> list, int position) {
-        mMusicPanelFragment.playAndStart(list, position);
+    public void onMusicItemClick(List<MusicItem> list, int position) {
+        if (mMusicController == null)
+            return;
+        mMusicController.play(list, position);
+        mMusicController.start();
+        onPanelUpdate();
     }
 
     @Override
-    public void onSlideListener(boolean slideUp) {
+    public void onSlideChanged(boolean slideUp) {
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
         if(slideUp) {
             fragmentTransaction.hide(mMusicPanelFragment)
@@ -79,7 +92,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final int SELECT_PICTURE_CODE = 111;
     @Override
-    public void onChangeBackgroundListener(boolean update) {
+    public void onChangeBackground(boolean update) {
         if(update) {
             Utility.loadBingPicture(this, mImageView);
         }else {
@@ -103,4 +116,66 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * for MusicPanelFragment.MusicPanelCallback
+     */
+    @Override
+    public void onPrevClick() {
+        if (mMusicController == null)
+            return;
+        mMusicController.prev();
+    }
+
+    @Override
+    public void onPlayPauseClick() {
+        if (mMusicController == null)
+            return;
+        if (mMusicController.isPlaying()) {
+            mMusicController.pause();
+        }else {
+            mMusicController.start();
+        }
+    }
+
+    @Override
+    public void onNextClick() {
+        if (mMusicController == null)
+            return;
+        mMusicController.next();
+    }
+
+    @Override
+    public void onModeClick() {
+        if (mMusicController == null)
+            return;
+        switch (mMusicController.getMode()){
+            case LIST_LOOP_MODE:
+                mMusicController.setMode(MusicControl.PlayMode.RANDOM_MODE);
+                break;
+            case RANDOM_MODE:
+                mMusicController.setMode(MusicControl.PlayMode.SINGLE_LOOP_MODE);
+                break;
+            case SINGLE_LOOP_MODE:
+                mMusicController.setMode(MusicControl.PlayMode.LIST_LOOP_MODE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onSeekTo(int progress) {
+        if (mMusicController == null)
+            return;
+        mMusicController.seekTo(progress);
+    }
+
+    @Override
+    public void onPanelUpdate() {
+        if (mMusicController == null)
+            return;
+        mMusicPanelFragment.updatePanel(mMusicController.getCurrentMusic(),
+                mMusicController.getPosition(), mMusicController.getMode(),
+                mMusicController.isPlaying());
+    }
 }

@@ -61,7 +61,7 @@ public class MusicService extends Service {
         mRemoteViews.setOnClickPendingIntent(R.id.panel_prev, pendingIntent);
         pendingIntent = PendingIntent.getBroadcast(this, 0,
                 new Intent(ACTION_START_PAUSE), PendingIntent.FLAG_UPDATE_CURRENT);
-        mRemoteViews.setOnClickPendingIntent(R.id.panel_start_stop, pendingIntent);
+        mRemoteViews.setOnClickPendingIntent(R.id.panel_play_pause, pendingIntent);
         pendingIntent = PendingIntent.getBroadcast(this, 0,
                 new Intent(ACTION_NEXT), PendingIntent.FLAG_UPDATE_CURRENT);
         mRemoteViews.setOnClickPendingIntent(R.id.panel_next, pendingIntent);
@@ -101,10 +101,10 @@ public class MusicService extends Service {
             mRemoteViews.setTextViewText(R.id.panel_artist, "------");
         }
         if(playing) {
-            mRemoteViews.setInt(R.id.panel_start_stop, "setBackgroundResource",
+            mRemoteViews.setInt(R.id.panel_play_pause, "setBackgroundResource",
                     R.drawable.pause);
         }else {
-            mRemoteViews.setInt(R.id.panel_start_stop, "setBackgroundResource",
+            mRemoteViews.setInt(R.id.panel_play_pause, "setBackgroundResource",
                     R.drawable.start);
         }
         startForeground(1, mNotification);
@@ -235,6 +235,11 @@ public class MusicService extends Service {
         @Override
         public PlayMode getMode() {
             return playMode;
+        }
+
+        @Override
+        public int getPosition() {
+            return currentPosition;
         }
 
         @Override

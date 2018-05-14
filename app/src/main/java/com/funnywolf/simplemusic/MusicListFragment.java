@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -86,10 +87,10 @@ public class MusicListFragment extends Fragment
                 Log.d(TAG, "onOptionsItemSelected: add_list");
                 break;
             case R.id.setting_background:
-                mMusicListCallback.onChangeBackgroundListener(false);
+                mMusicListCallback.onChangeBackground(false);
                 break;
             case R.id.update_background:
-                mMusicListCallback.onChangeBackgroundListener(true);
+                mMusicListCallback.onChangeBackground(true);
                 break;
         }
         return true;
@@ -125,7 +126,7 @@ public class MusicListFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mMusicListCallback.onMusicItemClickListener(mMusicList, position);
+        mMusicListCallback.onMusicItemClick(mMusicList, position);
     }
 
     /**
@@ -148,11 +149,11 @@ public class MusicListFragment extends Fragment
                 float lastY = event.getY();
                 if(lastY > mFirstY && mLastDirection) {
                     mLastDirection = false;
-                    mMusicListCallback.onSlideListener(false);
+                    mMusicListCallback.onSlideChanged(false);
                     mToolbar.setVisibility(View.VISIBLE);
                 }else if(lastY < mFirstY && !mLastDirection) {
                     mLastDirection = true;
-                    mMusicListCallback.onSlideListener(true);
+                    mMusicListCallback.onSlideChanged(true);
                     mToolbar.setVisibility(View.GONE);
                 }
                 break;
@@ -162,8 +163,8 @@ public class MusicListFragment extends Fragment
     }
 
     public interface MusicListCallback {
-        void onMusicItemClickListener(List<MusicItem> list, int position);
-        void onSlideListener(boolean slideUp);
-        void onChangeBackgroundListener(boolean update);
+        void onMusicItemClick(List<MusicItem> list, int position);
+        void onSlideChanged(boolean slideUp);
+        void onChangeBackground(boolean update);
     }
 }

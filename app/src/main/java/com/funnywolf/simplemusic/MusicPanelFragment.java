@@ -1,9 +1,11 @@
 package com.funnywolf.simplemusic;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +20,12 @@ public class MusicPanelFragment extends Fragment
 
     private static final String TAG = "MusicPanelFragment";
 
-    private MusicControl mMusicController;
+    private MusicPanelCallback mMusicPanelCallback;
     private UpdatePanelTask updatePanelTask;
 
     private TextView panelTitle, panelArtist, panelCurrentTime, panelDuration;
     private SeekBar panelSeekBar;
-    private Button panelMode, panelPrev, panelStartStop, panelNext;
+    private Button panelMode, panelPrev, panelPlayPause, panelNext;
 
     @Nullable
     @Override
@@ -37,8 +39,17 @@ public class MusicPanelFragment extends Fragment
         panelSeekBar = view.findViewById(R.id.panel_seek_bar);
         panelMode = view.findViewById(R.id.panel_mode);
         panelPrev = view.findViewById(R.id.panel_prev);
-        panelStartStop = view.findViewById(R.id.panel_start_stop);
+        panelPlayPause = view.findViewById(R.id.panel_play_pause);
         panelNext = view.findViewById(R.id.panel_next);
+
+        panelSeekBar.setOnSeekBarChangeListener(this);
+        panelMode.setOnClickListener(this);
+        panelPrev.setOnClickListener(this);
+        panelPlayPause.setOnClickListener(this);
+        panelNext.setOnClickListener(this);
+
+        mMusicPanelCallback = (MusicPanelCallback) getActivity();
+
         return view;
     }
 
@@ -46,7 +57,7 @@ public class MusicPanelFragment extends Fragment
     public void onResume() {
         super.onResume();
         updatePanelTask = new UpdatePanelTask();
-        updatePanelTask.execute(this);
+        updatePanelTask.execute(mMusicPanelCallback);
     }
 
     @Override
@@ -55,34 +66,12 @@ public class MusicPanelFragment extends Fragment
         updatePanelTask.cancel(true);
     }
 
-    public void setMusicController(MusicControl controller) {
-        mMusicController = controller;
-        panelSeekBar.setOnSeekBarChangeListener(this);
-        panelMode.setOnClickListener(this);
-        panelPrev.setOnClickListener(this);
-        panelStartStop.setOnClickListener(this);
-        panelNext.setOnClickListener(this);
-        updatePanel();
-    }
-
-    public void playAndStart(List<MusicItem> list, int position) {
-        mMusicController.play(list, position);
-        mMusicController.start();
-        updatePanel();
-    }
-
-    public void play(List<MusicItem> list, int position) {
-        mMusicController.play(list, position);
-        updatePanel();
-    }
-
-    public synchronized void updatePanel() {
-        if(mMusicController == null) {
-            return;
-        }
-        MusicItem music = mMusicController.getCurrentMusic();
+    final String[] PLAY_MODE = {"L", "R", "S"};
+    public synchronized void updatePanel(MusicItem music, int position,
+                                         MusicControl.PlayMode mode, boolean playing) {
         if (music != null) {
-            panelTitle.setText(music.title);
+            panelTitle.setText(String.format(Locale.getDefault(),
+                    "%d: %s", (position + 1), music.title));
             panelArtist.setText(music.artist);
             panelDuration.setText(music.duration);
             int currentTime = music.currentTime / 1000;
@@ -96,21 +85,11 @@ public class MusicPanelFragment extends Fragment
             panelCurrentTime.setText("00:00");
             panelSeekBar.setProgress(0);
         }
-        switch(mMusicController.getMode()) {
-            case LIST_LOOP_MODE:
-                panelMode.setText("L");
-                break;
-            case RANDOM_MODE:
-                panelMode.setText("R");
-                break;
-            case SINGLE_LOOP_MODE:
-                panelMode.setText("S");
-                break;
-        }
-        if(mMusicController.isPlaying()) {
-            panelStartStop.setBackgroundResource(R.drawable.pause);
+        panelMode.setText(PLAY_MODE[mode.ordinal()]);
+        if(playing) {
+            panelPlayPause.setBackgroundResource(R.drawable.pause);
         }else {
-            panelStartStop.setBackgroundResource(R.drawable.start);
+            panelPlayPause.setBackgroundResource(R.drawable.start);
         }
     }
 
@@ -121,37 +100,21 @@ public class MusicPanelFragment extends Fragment
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.panel_mode:
-                switch (mMusicController.getMode()){
-                    case LIST_LOOP_MODE:
-                        mMusicController.setMode(MusicControl.PlayMode.RANDOM_MODE);
-                        break;
-                    case RANDOM_MODE:
-                        mMusicController.setMode(MusicControl.PlayMode.SINGLE_LOOP_MODE);
-                        break;
-                    case SINGLE_LOOP_MODE:
-                        mMusicController.setMode(MusicControl.PlayMode.LIST_LOOP_MODE);
-                        break;
-                    default:
-                        break;
-                }
+                mMusicPanelCallback.onModeClick();
                 break;
             case R.id.panel_prev:
-                mMusicController.prev();
+                mMusicPanelCallback.onPrevClick();
                 break;
-            case R.id.panel_start_stop:
-                if (mMusicController.isPlaying()) {
-                    mMusicController.pause();
-                }else {
-                    mMusicController.start();
-                }
+            case R.id.panel_play_pause:
+                mMusicPanelCallback.onPlayPauseClick();
                 break;
             case R.id.panel_next:
-                mMusicController.next();
+                mMusicPanelCallback.onNextClick();
                 break;
             default:
                 break;
         }
-        updatePanel();
+        mMusicPanelCallback.onPanelUpdate();
     }
 
     /**
@@ -159,26 +122,22 @@ public class MusicPanelFragment extends Fragment
      */
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        mMusicController.pause();
-        updatePanel();
     }
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
     }
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        mMusicController.seekTo(seekBar.getProgress());
-        mMusicController.start();
-        updatePanel();
+        mMusicPanelCallback.onSeekTo(seekBar.getProgress());
+        mMusicPanelCallback.onPanelUpdate();
     }
 
-    static class UpdatePanelTask extends AsyncTask<MusicPanelFragment, MusicPanelFragment, Boolean> {
+    static class UpdatePanelTask extends AsyncTask<MusicPanelCallback, MusicPanelCallback, Boolean> {
         @Override
-        protected Boolean doInBackground(MusicPanelFragment... musicPanelFragments) {
+        protected Boolean doInBackground(MusicPanelCallback... callbacks) {
             while(!isCancelled()) {
                 try {
-                    publishProgress(musicPanelFragments);
+                    publishProgress(callbacks);
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     break;
@@ -188,11 +147,19 @@ public class MusicPanelFragment extends Fragment
         }
 
         @Override
-        protected void onProgressUpdate(MusicPanelFragment... values) {
-            values[0].updatePanel();
+        protected void onProgressUpdate(MusicPanelCallback... callbacks) {
+            callbacks[0].onPanelUpdate();
         }
 
     }
 
+    public interface MusicPanelCallback {
+        void onPrevClick();
+        void onPlayPauseClick();
+        void onNextClick();
+        void onModeClick();
+        void onSeekTo(int progress);
+        void onPanelUpdate();
+    }
 
 }
