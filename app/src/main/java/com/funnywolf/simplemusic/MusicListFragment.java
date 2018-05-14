@@ -1,6 +1,7 @@
 package com.funnywolf.simplemusic;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -12,6 +13,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,9 +25,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MusicListFragment extends Fragment {
+public class MusicListFragment extends Fragment
+    implements AdapterView.OnItemClickListener, View.OnTouchListener{
 
     private Toolbar mToolbar;
+    private static final String TAG = "MusicListFragment";
+    
     private TextView mListTitle;
     private ListView mMusicListView;
 
@@ -47,12 +54,8 @@ public class MusicListFragment extends Fragment {
         mMusicList = getAllMusic();
         mMusicItemAdapter = new MusicItemAdapter(getActivity(), mMusicList);
         mMusicListView.setAdapter(mMusicItemAdapter);
-        mMusicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mMusicListCallback.onMusicItemClickListener(mMusicList, position);
-            }
-        });
+        mMusicListView.setOnItemClickListener(this);
+        mMusicListView.setOnTouchListener(this);
         mListTitle.setText("Total: " + mMusicList.size());
 
         return view;
@@ -102,8 +105,46 @@ public class MusicListFragment extends Fragment {
         return list;
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        mMusicListCallback.onMusicItemClickListener(mMusicList, position);
+    }
+
+    /**
+     * last slide direction
+     * true: slide up, false: slider down
+     */
+    private boolean mLastDirection = false;
+    private float mFirstY;
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        v.performClick();
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mFirstY = event.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                break;
+            case MotionEvent.ACTION_UP:
+                float lastY = event.getY();
+                if(lastY > mFirstY && mLastDirection) {
+                    mLastDirection = false;
+                    mMusicListCallback.onSlideListener(false);
+                    mListTitle.setVisibility(View.VISIBLE);
+                }else if(lastY < mFirstY && !mLastDirection) {
+                    mLastDirection = true;
+                    mMusicListCallback.onSlideListener(true);
+                    mListTitle.setVisibility(View.GONE);
+                }
+                break;
+        }
+
+        return false;
+    }
 
     public interface MusicListCallback {
         void onMusicItemClickListener(List<MusicItem> list, int position);
+        void onSlideListener(boolean slideUp);
     }
 }

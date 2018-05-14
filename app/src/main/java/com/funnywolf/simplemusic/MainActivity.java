@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -14,6 +17,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "SimpleMusic";
 
+    private FragmentManager mFragmentManager;
     private MusicPanelFragment mMusicPanelFragment;
     private MusicListFragment mMusicListFragment;
 
@@ -23,10 +27,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        mMusicPanelFragment = (MusicPanelFragment) fragmentManager.
+        mFragmentManager = getSupportFragmentManager();
+        mMusicPanelFragment = (MusicPanelFragment) mFragmentManager.
                 findFragmentById(R.id.music_panel);
-        mMusicListFragment = (MusicListFragment) fragmentManager.
+        mMusicListFragment = (MusicListFragment) mFragmentManager.
                 findFragmentById(R.id.music_list);
 
         Intent intent = new Intent(this, MusicService.class);
@@ -47,7 +51,20 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onMusicItemClickListener(List<MusicItem> list, int position) {
-        mMusicPanelFragment.play(list, position);
+        mMusicPanelFragment.playAndStart(list, position);
+    }
+
+    @Override
+    public void onSlideListener(boolean slideUp) {
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        if(slideUp) {
+            fragmentTransaction.hide(mMusicPanelFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        }else {
+            fragmentTransaction.show(mMusicPanelFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        }
+        fragmentTransaction.commit();
     }
 
 }
