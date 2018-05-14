@@ -14,4 +14,9 @@
         android:icon="@drawable/ic_setting_background"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/update_background"
+        android:title="更新背景"
+        app:showAsAction="never"/>
+
 </menu>

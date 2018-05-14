@@ -3,11 +3,13 @@ package com.funnywolf.simplemusic;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,8 +21,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +33,9 @@ import java.util.List;
 public class MusicListFragment extends Fragment
     implements AdapterView.OnItemClickListener, View.OnTouchListener{
 
-    private Toolbar mToolbar;
     private static final String TAG = "MusicListFragment";
-    
+
+    private Toolbar mToolbar;
     private TextView mListTitle;
     private ListView mMusicListView;
 
@@ -49,6 +54,9 @@ public class MusicListFragment extends Fragment
         mMusicListView = view.findViewById(R.id.music_list);
         mListTitle = view.findViewById(R.id.list_title);
 
+        ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
+        setHasOptionsMenu(true);
+
         mMusicListCallback = (MusicListCallback) getActivity();
 
         mMusicList = getAllMusic();
@@ -62,6 +70,11 @@ public class MusicListFragment extends Fragment
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar, menu);
     }
@@ -70,15 +83,20 @@ public class MusicListFragment extends Fragment
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add_list:
+                Log.d(TAG, "onOptionsItemSelected: add_list");
                 break;
             case R.id.setting_background:
+                mMusicListCallback.onChangeBackgroundListener(false);
+                break;
+            case R.id.update_background:
+                mMusicListCallback.onChangeBackgroundListener(true);
                 break;
         }
         return true;
     }
 
     private ArrayList<MusicItem> getAllMusic() {
-        ArrayList<MusicItem> list = new ArrayList<MusicItem>();
+        ArrayList<MusicItem> list = new ArrayList<>();
         Cursor cursor = getActivity().getContentResolver().
                 query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     null, null, null,
@@ -131,11 +149,11 @@ public class MusicListFragment extends Fragment
                 if(lastY > mFirstY && mLastDirection) {
                     mLastDirection = false;
                     mMusicListCallback.onSlideListener(false);
-                    mListTitle.setVisibility(View.VISIBLE);
+                    mToolbar.setVisibility(View.VISIBLE);
                 }else if(lastY < mFirstY && !mLastDirection) {
                     mLastDirection = true;
                     mMusicListCallback.onSlideListener(true);
-                    mListTitle.setVisibility(View.GONE);
+                    mToolbar.setVisibility(View.GONE);
                 }
                 break;
         }
@@ -146,5 +164,6 @@ public class MusicListFragment extends Fragment
     public interface MusicListCallback {
         void onMusicItemClickListener(List<MusicItem> list, int position);
         void onSlideListener(boolean slideUp);
+        void onChangeBackgroundListener(boolean update);
     }
 }

@@ -3,6 +3,7 @@
     package="com.funnywolf.simplemusic">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -14,7 +15,7 @@
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
-            android:configChanges="orientation">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

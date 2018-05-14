@@ -181,7 +181,7 @@ public class MusicPanelFragment extends Fragment
                     publishProgress(musicPanelFragments);
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    break;
                 }
             }
             return false;
