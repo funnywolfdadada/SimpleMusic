@@ -228,7 +228,7 @@ public class MusicService extends Service {
             if (!isReady || mMusicList == null)
                 return;
             MusicItem music = mMusicList.get(currentPosition);
-            music.currentTime = msec * music.durationInt / 100;
+            music.currentTime = msec < music.durationInt ? msec : music.durationInt;
             mMediaPlayer.seekTo(music.currentTime);
         }
 

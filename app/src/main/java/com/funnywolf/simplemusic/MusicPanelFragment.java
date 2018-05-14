@@ -66,18 +66,20 @@ public class MusicPanelFragment extends Fragment
         updatePanelTask.cancel(true);
     }
 
-    final String[] PLAY_MODE = {"L", "R", "S"};
+    private final String[] PLAY_MODE = {"L", "R", "S"};
+    private MusicItem lastMusic;
     public synchronized void updatePanel(MusicItem music, int position,
                                          MusicControl.PlayMode mode, boolean playing) {
         if (music != null) {
-            panelTitle.setText(String.format(Locale.getDefault(),
-                    "%d: %s", (position + 1), music.title));
-            panelArtist.setText(music.artist);
-            panelDuration.setText(music.duration);
-            int currentTime = music.currentTime / 1000;
-            panelCurrentTime.setText(String.format(Locale.getDefault(),
-                    "%d:%02d", currentTime / 60, currentTime % 60));
-            panelSeekBar.setProgress(100 * music.currentTime / music.durationInt);
+            if(lastMusic != music) {
+                panelTitle.setText(String.format(Locale.getDefault(),
+                        "%d: %s", (position + 1), music.title));
+                panelArtist.setText(music.artist);
+                panelDuration.setText(music.duration);
+                panelSeekBar.setMax(music.durationInt);
+                lastMusic = music;
+            }
+            panelSeekBar.setProgress(music.currentTime);
         } else {
             panelTitle.setText("------");
             panelArtist.setText("------");
@@ -125,6 +127,9 @@ public class MusicPanelFragment extends Fragment
     }
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        int current = progress / 1000;
+        panelCurrentTime.setText(String.format(Locale.getDefault(),
+                "%d:%02d", current / 60, current % 60));
     }
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
