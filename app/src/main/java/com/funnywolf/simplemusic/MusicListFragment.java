@@ -7,7 +7,11 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -19,8 +23,10 @@ import java.util.List;
 
 public class MusicListFragment extends Fragment {
 
+    private Toolbar mToolbar;
     private TextView mListTitle;
     private ListView mMusicListView;
+
     private MusicItemAdapter mMusicItemAdapter;
     private List<MusicItem> mMusicList = new ArrayList<>();
     private MusicListCallback mMusicListCallback;
@@ -29,8 +35,10 @@ public class MusicListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.music_list_layout, container, false);
 
+        mToolbar = view.findViewById(R.id.toolbar);
         mMusicListView = view.findViewById(R.id.music_list);
         mListTitle = view.findViewById(R.id.list_title);
 
@@ -51,9 +59,19 @@ public class MusicListFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar, menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.add_list:
+                break;
+            case R.id.setting_background:
+                break;
+        }
+        return true;
     }
 
     private ArrayList<MusicItem> getAllMusic() {

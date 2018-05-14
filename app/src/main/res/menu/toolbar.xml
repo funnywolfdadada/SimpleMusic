@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/add_list"
+        android:title="新建歌单"
+        android:icon="@drawable/ic_add_list"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/setting_background"
+        android:title="设置背景"
+        android:icon="@drawable/ic_setting_background"
+        app:showAsAction="never"/>
+
+</menu>
