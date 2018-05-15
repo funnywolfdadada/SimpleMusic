@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Locale;
 
 public class MusicListItemAdapter extends BaseAdapter {
 
@@ -55,7 +56,8 @@ public class MusicListItemAdapter extends BaseAdapter {
         MusicListItem list = mList.get(i);
         viewHolder.listNum.setText(String.valueOf(i + 1));
         viewHolder.listName.setText(list.getName());
-        viewHolder.listCapacity.setText(String.valueOf(list.getCapacity()));
+        viewHolder.listCapacity.setText(String.format(Locale.getDefault(),
+                "共 %d 首", list.getCapacity()));
 
         return view;
     }

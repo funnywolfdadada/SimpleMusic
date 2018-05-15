@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class MusicListFragment extends Fragment
     implements AdapterView.OnItemClickListener, View.OnTouchListener{
@@ -34,12 +35,12 @@ public class MusicListFragment extends Fragment
     private TextView mListTitle;
     private ListView mMusicListView;
 
+    private boolean inMusicList = false;
     private MusicListItemAdapter mMusicListItemAdapter;
     private ArrayList<MusicListItem> mMusicLists;
     private MusicListItem mCurrentMusicListItem;
     private MusicItemAdapter mMusicItemAdapter;
     private ArrayList<MusicItem> mCurrentMusicList;
-    private boolean inMusicList = false;
 
     private MusicListCallback mMusicListCallback;
 
@@ -94,7 +95,28 @@ public class MusicListFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mMusicListCallback.onMusicItemClick(mCurrentMusicList, position);
+        if(inMusicList) {
+            mMusicListCallback.onMusicItemClick(mCurrentMusicList, position);
+        }else {
+            inMusicList = true;
+            mCurrentMusicListItem = mMusicLists.get(position);
+            mCurrentMusicList = mCurrentMusicListItem.getMusicList();
+            mMusicItemAdapter.setList(mCurrentMusicList);
+            mMusicListView.setAdapter(mMusicItemAdapter);
+            mListTitle.setText(String.format(Locale.getDefault(), "%s: 共 %d 首",
+                    mCurrentMusicListItem.getName(), mCurrentMusicListItem.getCapacity()));
+        }
+    }
+
+    public boolean onBackTouch() {
+        if(inMusicList) {
+            inMusicList = false;
+            mMusicListItemAdapter.setList(mMusicLists);
+            mMusicListView.setAdapter(mMusicListItemAdapter);
+            mListTitle.setText("歌单: " + mMusicLists.size());
+            return false;
+        }
+        return true;
     }
 
     public void musicServiceConnected() {
@@ -117,7 +139,7 @@ public class MusicListFragment extends Fragment
         mMusicListView.setAdapter(mMusicListItemAdapter);
         mMusicListView.setOnItemClickListener(this);
         mMusicListView.setOnTouchListener(this);
-        mListTitle.setText("Total: " + mMusicLists.size());
+        mListTitle.setText("歌单: " + mMusicLists.size());
 
     }
 

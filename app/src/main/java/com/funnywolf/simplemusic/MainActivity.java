@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity
     private MusicPanelFragment mMusicPanelFragment;
     private MusicListFragment mMusicListFragment;
 
-    private MusicControl mMusicController;
+    private static MusicControl mMusicController;
 
     private ImageView mImageView;
 
@@ -46,7 +47,12 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MusicService.class);
         startService(intent);
         bindService(intent, this, BIND_AUTO_CREATE);
+    }
 
+    @Override
+    public void onBackPressed() {
+        if(mMusicListFragment.onBackTouch())
+            super.onBackPressed();
     }
 
     /**
@@ -54,8 +60,10 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mMusicController = ((MusicControl) service);
-        mMusicListFragment.musicServiceConnected();
+        if(mMusicController == null) {
+            mMusicController = ((MusicControl) service);
+            mMusicListFragment.musicServiceConnected();
+        }
     }
 
     @Override
