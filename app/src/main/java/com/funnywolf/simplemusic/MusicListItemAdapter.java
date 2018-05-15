@@ -8,24 +8,18 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.zip.Inflater;
 
-/**
- * Created by dell on 2018/5/9.
- */
+public class MusicListItemAdapter extends BaseAdapter {
 
-public class MusicItemAdapter extends BaseAdapter {
-
-    private List<MusicItem> mList;
+    private List<MusicListItem> mList;
     private LayoutInflater mLayoutInflater;
 
-    public MusicItemAdapter(Context context, List<MusicItem> list) {
+    public MusicListItemAdapter(Context context, List<MusicListItem> list) {
         mList = list;
         mLayoutInflater = LayoutInflater.from(context);
     }
 
-    public void setList(List<MusicItem> list) {
+    public void setList(List<MusicListItem> list) {
         mList = list;
     }
 
@@ -48,27 +42,28 @@ public class MusicItemAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
         if(view == null) {
-            view = mLayoutInflater.inflate(R.layout.music_item, null);
+            view = mLayoutInflater.inflate(R.layout.music_list_item, null);
             viewHolder = new ViewHolder();
-            viewHolder.musicNum = view.findViewById(R.id.music_num);
-            viewHolder.musicTitle = view.findViewById(R.id.music_title);
-            viewHolder.musicName = view.findViewById(R.id.music_name);
+            viewHolder.listNum = view.findViewById(R.id.list_num);
+            viewHolder.listName = view.findViewById(R.id.list_name);
+            viewHolder.listCapacity = view.findViewById(R.id.list_capacity);
             view.setTag(viewHolder);
         }else {
             viewHolder = (ViewHolder)view.getTag();
         }
 
-        MusicItem music = mList.get(i);
-        viewHolder.musicNum.setText(String.valueOf(i + 1));
-        viewHolder.musicTitle.setText(music.title);
-        viewHolder.musicName.setText(music.name);
+        MusicListItem list = mList.get(i);
+        viewHolder.listNum.setText(String.valueOf(i + 1));
+        viewHolder.listName.setText(list.getName());
+        viewHolder.listCapacity.setText(String.valueOf(list.getCapacity()));
 
         return view;
     }
 
     private class ViewHolder {
-        private TextView musicNum;
-        private TextView musicTitle;
-        private TextView musicName;
+        private TextView listNum;
+        private TextView listName;
+        private TextView listCapacity;
     }
 }
+

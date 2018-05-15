@@ -1,7 +1,6 @@
-package com.funnywolf.simplemusic;
+package com.funnywolf.simplemusic.Util;
 
 import android.app.Activity;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -21,7 +20,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class Utility {
-    private static final String TAG = "SimpleMusic-Utility";
 
     private static OkHttpClient client = new OkHttpClient();
     public static void sendOkHttpRequest(String address, okhttp3.Callback callback) {

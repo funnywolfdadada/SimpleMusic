@@ -1,9 +1,5 @@
 package com.funnywolf.simplemusic;
 
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -16,19 +12,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MusicListFragment extends Fragment
@@ -40,9 +34,16 @@ public class MusicListFragment extends Fragment
     private TextView mListTitle;
     private ListView mMusicListView;
 
+    private MusicListItemAdapter mMusicListItemAdapter;
+    private ArrayList<MusicListItem> mMusicLists;
+    private MusicListItem mCurrentMusicListItem;
     private MusicItemAdapter mMusicItemAdapter;
-    private List<MusicItem> mMusicList = new ArrayList<>();
+    private ArrayList<MusicItem> mCurrentMusicList;
+    private boolean inMusicList = false;
+
     private MusicListCallback mMusicListCallback;
+
+    private static Gson mGson = new Gson();
 
     @Nullable
     @Override
@@ -60,12 +61,7 @@ public class MusicListFragment extends Fragment
 
         mMusicListCallback = (MusicListCallback) getActivity();
 
-        mMusicList = getAllMusic();
-        mMusicItemAdapter = new MusicItemAdapter(getActivity(), mMusicList);
-        mMusicListView.setAdapter(mMusicItemAdapter);
-        mMusicListView.setOnItemClickListener(this);
-        mMusicListView.setOnTouchListener(this);
-        mListTitle.setText("Total: " + mMusicList.size());
+        initMusicList();
 
         return view;
     }
@@ -98,15 +94,43 @@ public class MusicListFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mMusicListCallback.onMusicItemClick(mMusicList, position);
+        mMusicListCallback.onMusicItemClick(mCurrentMusicList, position);
     }
 
     public void musicServiceConnected() {
-        mMusicListCallback.onMusicListPrepare(mMusicList, 0);
+        mMusicListCallback.onMusicListPrepare(mCurrentMusicList, 0);
     }
 
-    private ArrayList<MusicItem> getAllMusic() {
-        ArrayList<MusicItem> list = new ArrayList<>();
+    private void initMusicList() {
+        mMusicLists = new ArrayList<>();
+
+        mCurrentMusicListItem = new MusicListItem("所有歌曲");
+        getAllMusic(mCurrentMusicListItem);
+        mMusicLists.add(mCurrentMusicListItem);
+
+        mCurrentMusicList = mCurrentMusicListItem.getMusicList();
+
+        mMusicListItemAdapter = new MusicListItemAdapter(getActivity(), mMusicLists);
+
+        mMusicItemAdapter = new MusicItemAdapter(getActivity(), mCurrentMusicList);
+
+        mMusicListView.setAdapter(mMusicListItemAdapter);
+        mMusicListView.setOnItemClickListener(this);
+        mMusicListView.setOnTouchListener(this);
+        mListTitle.setText("Total: " + mMusicLists.size());
+
+    }
+
+    private void loadMusicList() {
+
+    }
+
+    private void saveMusicList() {
+
+    }
+
+    private void getAllMusic(MusicListItem listItem) {
+        ArrayList<MusicItem> list = listItem.getMusicList();
         Cursor cursor = getActivity().getContentResolver().
                 query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         null, null, null,
@@ -125,12 +149,11 @@ public class MusicListFragment extends Fragment
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                 Long size = cursor.getLong(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                list.add(new MusicItem(name, title, artist, path, duration, size));
+                list.add(new MusicItem(listItem, name, title, artist, path, duration, size));
                 cursor.moveToNext();
             }
             cursor.close();
         }
-        return list;
     }
 
     /**
