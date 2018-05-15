@@ -52,7 +52,6 @@
 
         <SeekBar
             android:id="@+id/panel_seek_bar"
-
             android:max="100"
             android:progress="0"
             android:layout_weight="1"

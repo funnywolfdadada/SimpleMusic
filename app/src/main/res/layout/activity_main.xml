@@ -10,7 +10,7 @@
     <ImageView
         android:id="@+id/background"
         android:scaleType="fitCenter"
-        android:background="#FFF"
+        android:background="#888"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <LinearLayout

@@ -48,10 +48,7 @@ public class MusicItemAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.musicNum = view.findViewById(R.id.music_num);
             viewHolder.musicTitle = view.findViewById(R.id.music_title);
-            viewHolder.musicArtist = view.findViewById(R.id.music_artist);
             viewHolder.musicName = view.findViewById(R.id.music_name);
-            viewHolder.musicDuration = view.findViewById(R.id.music_duration);
-            viewHolder.musicSize = view.findViewById(R.id.music_size);
             view.setTag(viewHolder);
         }else {
             viewHolder = (ViewHolder)view.getTag();
@@ -60,10 +57,7 @@ public class MusicItemAdapter extends BaseAdapter {
         MusicItem music = mList.get(i);
         viewHolder.musicNum.setText(String.valueOf(i + 1));
         viewHolder.musicTitle.setText(music.title);
-        viewHolder.musicArtist.setText(music.artist);
         viewHolder.musicName.setText(music.name);
-        viewHolder.musicDuration.setText(music.duration);
-        viewHolder.musicSize.setText(music.size);
 
         return view;
     }
@@ -71,9 +65,6 @@ public class MusicItemAdapter extends BaseAdapter {
     private class ViewHolder {
         private TextView musicNum;
         private TextView musicTitle;
-        private TextView musicArtist;
         private TextView musicName;
-        private TextView musicDuration;
-        private TextView musicSize;
     }
 }
