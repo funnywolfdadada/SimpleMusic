@@ -46,6 +46,7 @@ public class MusicItemAdapter extends BaseAdapter {
         if(view == null) {
             view = mLayoutInflater.inflate(R.layout.music_item, null);
             viewHolder = new ViewHolder();
+            viewHolder.musicNum = view.findViewById(R.id.music_num);
             viewHolder.musicTitle = view.findViewById(R.id.music_title);
             viewHolder.musicArtist = view.findViewById(R.id.music_artist);
             viewHolder.musicName = view.findViewById(R.id.music_name);
@@ -57,8 +58,8 @@ public class MusicItemAdapter extends BaseAdapter {
         }
 
         MusicItem music = mList.get(i);
-        viewHolder.musicTitle.setText(String.format(Locale.getDefault(),
-                "%d: %s", (i + 1), music.title));
+        viewHolder.musicNum.setText(String.valueOf(i + 1));
+        viewHolder.musicTitle.setText(music.title);
         viewHolder.musicArtist.setText(music.artist);
         viewHolder.musicName.setText(music.name);
         viewHolder.musicDuration.setText(music.duration);
@@ -68,6 +69,7 @@ public class MusicItemAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
+        private TextView musicNum;
         private TextView musicTitle;
         private TextView musicArtist;
         private TextView musicName;

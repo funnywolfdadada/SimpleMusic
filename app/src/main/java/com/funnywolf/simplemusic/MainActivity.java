@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         mMusicController = ((MusicControl) service);
+        mMusicListFragment.musicServiceConnected();
     }
 
     @Override
@@ -68,17 +69,38 @@ public class MainActivity extends AppCompatActivity
     /**
      * for MusicListFragment.MusicListCallback
      */
+
     @Override
-    public void onMusicItemClick(List<MusicItem> list, int position) {
+    public void onMusicListChange(List<MusicItem> list, int position) {
         if (mMusicController == null)
             return;
-        mMusicController.play(list, position);
-        mMusicController.start();
+        mMusicController.setMusicList(list);
+        mMusicController.setCurrentPosition(position);
+    }
+
+    @Override
+    public void onMusicListPrepare(List<MusicItem> list, int position) {
+        if (mMusicController == null)
+            return;
+        mMusicController.setMusicList(list);
+        mMusicController.setCurrentPosition(position);
+        mMusicController.prepare();
         onPanelUpdate();
     }
 
     @Override
-    public void onSlideChanged(boolean slideUp) {
+    public void onMusicItemClick(List<MusicItem> list, int position) {
+        if (mMusicController == null)
+            return;
+        mMusicController.setMusicList(list);
+        mMusicController.setCurrentPosition(position);
+        mMusicController.prepare();
+        mMusicController.play();
+        onPanelUpdate();
+    }
+
+    @Override
+    public void onSlideDirectionChange(boolean slideUp) {
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
         if(slideUp) {
             fragmentTransaction.hide(mMusicPanelFragment)
@@ -133,7 +155,7 @@ public class MainActivity extends AppCompatActivity
         if (mMusicController.isPlaying()) {
             mMusicController.pause();
         }else {
-            mMusicController.start();
+            mMusicController.play();
         }
     }
 
@@ -175,7 +197,7 @@ public class MainActivity extends AppCompatActivity
         if (mMusicController == null)
             return;
         mMusicPanelFragment.updatePanel(mMusicController.getCurrentMusic(),
-                mMusicController.getPosition(), mMusicController.getMode(),
+                mMusicController.getCurrentPosition(), mMusicController.getMode(),
                 mMusicController.isPlaying());
     }
 }

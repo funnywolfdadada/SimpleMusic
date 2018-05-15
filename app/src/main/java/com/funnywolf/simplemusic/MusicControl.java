@@ -11,9 +11,14 @@ public interface MusicControl {
         LIST_LOOP_MODE, RANDOM_MODE, SINGLE_LOOP_MODE
     }
 
-    void play(List<MusicItem> list, int position);
+    void setMusicList(List<MusicItem> list);
+    void setCurrentPosition(int position);
+    int getCurrentPosition();
 
-    void start();
+    MusicItem getCurrentMusic();
+
+    void prepare();
+    void play();
     void pause();
     void next();
     void prev();
@@ -21,8 +26,6 @@ public interface MusicControl {
     PlayMode getMode();
     void setMode(PlayMode mode);
 
-    int getPosition();
-    MusicItem getCurrentMusic();
     void seekTo(int msec);
 
     boolean isPlaying();

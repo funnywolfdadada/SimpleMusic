@@ -96,12 +96,21 @@ public class MusicListFragment extends Fragment
         return true;
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        mMusicListCallback.onMusicItemClick(mMusicList, position);
+    }
+
+    public void musicServiceConnected() {
+        mMusicListCallback.onMusicListPrepare(mMusicList, 0);
+    }
+
     private ArrayList<MusicItem> getAllMusic() {
         ArrayList<MusicItem> list = new ArrayList<>();
         Cursor cursor = getActivity().getContentResolver().
                 query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    null, null, null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                        null, null, null,
+                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         if(cursor != null && cursor.moveToFirst()) {
             while(!cursor.isAfterLast()){
                 String name = cursor.getString(
@@ -124,11 +133,6 @@ public class MusicListFragment extends Fragment
         return list;
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mMusicListCallback.onMusicItemClick(mMusicList, position);
-    }
-
     /**
      * last slide direction
      * true: slide up, false: slider down
@@ -149,11 +153,11 @@ public class MusicListFragment extends Fragment
                 float lastY = event.getY();
                 if(lastY > mFirstY && mLastDirection) {
                     mLastDirection = false;
-                    mMusicListCallback.onSlideChanged(false);
+                    mMusicListCallback.onSlideDirectionChange(false);
                     mToolbar.setVisibility(View.VISIBLE);
                 }else if(lastY < mFirstY && !mLastDirection) {
                     mLastDirection = true;
-                    mMusicListCallback.onSlideChanged(true);
+                    mMusicListCallback.onSlideDirectionChange(true);
                     mToolbar.setVisibility(View.GONE);
                 }
                 break;
@@ -163,8 +167,10 @@ public class MusicListFragment extends Fragment
     }
 
     public interface MusicListCallback {
+        void onMusicListChange(List<MusicItem> list, int position);
+        void onMusicListPrepare(List<MusicItem> list, int position);
         void onMusicItemClick(List<MusicItem> list, int position);
-        void onSlideChanged(boolean slideUp);
+        void onSlideDirectionChange(boolean slideUp);
         void onChangeBackground(boolean update);
     }
 }
