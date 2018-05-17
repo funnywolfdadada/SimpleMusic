@@ -1,11 +1,8 @@
 package com.funnywolf.simplemusic;
 
-import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,7 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.funnywolf.simplemusic.Database.MusicItem;
-import com.funnywolf.simplemusic.Database.MusicListItem;
+import com.funnywolf.simplemusic.Database.MusicList;
 import com.funnywolf.simplemusic.Util.Utility;
 
 import java.util.ArrayList;
@@ -36,12 +33,12 @@ public class MusicListFragment extends Fragment
 
     private boolean inMusicList = false;
 
-    private ArrayList<MusicListItem> mMusicLists;
+    private MusicList<MusicList<MusicItem>> mMusicLists = new MusicList<>("SimpleMusic");
 
-    private MusicListItem mCurrentMusicListItem;
-    private MusicListItem mPlayingMusicListItem;
+    private MusicList<MusicItem> mCurrentMusicList;
+    private MusicList<MusicItem> mPlayingMusicList;
 
-    private MusicListItemAdapter mMusicListItemAdapter;
+    private MusicListAdapter mMusicListAdapter;
     private MusicItemAdapter mMusicItemAdapter;
 
 
@@ -64,9 +61,8 @@ public class MusicListFragment extends Fragment
 
         loadMusicList();
 
-        mMusicListItemAdapter = new MusicListItemAdapter(getActivity(), mMusicLists);
-        mMusicItemAdapter = new MusicItemAdapter(getActivity(),
-                mPlayingMusicListItem.getMusicList());
+        mMusicListAdapter = new MusicListAdapter(getActivity(), mMusicLists);
+        mMusicItemAdapter = new MusicItemAdapter(getActivity(), mPlayingMusicList);
 
         updateFragment();
         return view;
@@ -90,53 +86,54 @@ public class MusicListFragment extends Fragment
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if(inMusicList) {
-            mPlayingMusicListItem.setPlaying(false);
-            mPlayingMusicListItem = mCurrentMusicListItem;
-            mPlayingMusicListItem.setPlaying(true);
-            mMusicListCallback.onMusicItemClick(mPlayingMusicListItem.getMusicList(), position);
+            mPlayingMusicList.setPlaying(false);
+            mPlayingMusicList = mCurrentMusicList;
+            mPlayingMusicList.setPlaying(true);
+            mMusicListCallback.onMusicItemClick(mPlayingMusicList, position);
         }else {
             inMusicList = true;
-            mCurrentMusicListItem = mMusicLists.get(position);
+            mCurrentMusicList = mMusicLists.get(position);
             updateFragment();
         }
     }
 
     private void updateFragment() {
         if(inMusicList) {
-            mMusicItemAdapter.setList(mCurrentMusicListItem.getMusicList());
+            mMusicItemAdapter.setList(mCurrentMusicList);
             mMusicListView.setAdapter(mMusicItemAdapter);
             mListTitle.setText(String.format(Locale.getDefault(), "%s: 共 %d 首",
-                    mCurrentMusicListItem.getName(), mCurrentMusicListItem.getCapacity()));
+                    mCurrentMusicList.getName(), mCurrentMusicList.size()));
             mBackImageView.setBackgroundResource(R.drawable.ic_back);
         }else {
-            mMusicListItemAdapter.setList(mMusicLists);
-            mMusicListView.setAdapter(mMusicListItemAdapter);
+            mMusicListAdapter.setList(mMusicLists);
+            mMusicListView.setAdapter(mMusicListAdapter);
             mListTitle.setText("歌单: " + mMusicLists.size());
             mBackImageView.setBackgroundResource(R.drawable.ic_add_list);
         }
     }
 
     private void loadMusicList() {
-        mMusicLists = new ArrayList<>();
-
-        MusicListItem listItem = new MusicListItem("所有歌曲");
-        Utility.getAllMusic(getActivity(), listItem.getMusicList());
+        MusicList<MusicItem> listItem = new MusicList<>("所有歌曲");
+        Utility.getAllMusic(getActivity(), listItem);
         mMusicLists.add(listItem);
-        mPlayingMusicListItem = listItem;
-        mCurrentMusicListItem = listItem;
+        mPlayingMusicList = listItem;
+        mCurrentMusicList = listItem;
 
-        listItem = new MusicListItem("新建歌单1");
+        listItem = new MusicList<>("新建歌单1");
         for(int i = 0; i < 10; i++) {
-            listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(11 + 5 * i));
+            listItem.add(mPlayingMusicList.get(11 + 5 * i));
         }
         mMusicLists.add(listItem);
-        listItem = new MusicListItem("新建歌单2");
+        listItem = new MusicList<>("新建歌单2");
         for(int i = 0; i < 10; i++) {
-            listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(22 + 5 * i));
+            listItem.add(mPlayingMusicList.get(22 + 5 * i));
         }
         mMusicLists.add(listItem);
+        mMusicLists.add(new MusicList<MusicItem>("新建歌单1"));
+        mMusicLists.add(new MusicList<MusicItem>("新建歌单1"));
+        mMusicLists.add(new MusicList<MusicItem>("新建歌单1"));
 
-        mPlayingMusicListItem.setPlaying(true);
+        mPlayingMusicList.setPlaying(true);
     }
 
     private void saveMusicList() {
@@ -152,7 +149,7 @@ public class MusicListFragment extends Fragment
     }
 
     public void musicServiceConnected() {
-        mMusicListCallback.onMusicListPrepare(mCurrentMusicListItem.getMusicList(), 0);
+        mMusicListCallback.onMusicListPrepare(mCurrentMusicList, 0);
     }
 
 
@@ -188,9 +185,9 @@ public class MusicListFragment extends Fragment
     }
 
     public interface MusicListCallback {
-        void onMusicListChange(List<MusicItem> list, int position);
-        void onMusicListPrepare(List<MusicItem> list, int position);
-        void onMusicItemClick(List<MusicItem> list, int position);
+        void onMusicListChange(MusicList<MusicItem> list, int position);
+        void onMusicListPrepare(MusicList<MusicItem> list, int position);
+        void onMusicItemClick(MusicList<MusicItem> list, int position);
         void onSlideDirectionChange(boolean slideUp);
     }
 }

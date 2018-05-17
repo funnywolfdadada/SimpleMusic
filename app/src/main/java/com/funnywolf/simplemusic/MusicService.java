@@ -16,6 +16,7 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.funnywolf.simplemusic.Database.MusicItem;
+import com.funnywolf.simplemusic.Database.MusicList;
 
 import java.io.IOException;
 import java.util.List;
@@ -141,7 +142,7 @@ public class MusicService extends Service {
 
         private MediaPlayer mMediaPlayer;
 
-        private List<MusicItem> mMusicList;
+        private MusicList<MusicItem> mMusicList;
         private int mCurrentPosition = 0;
         private MusicItem mCurrentMusic = null;
         private boolean isPlaying = false;
@@ -192,7 +193,7 @@ public class MusicService extends Service {
         }
 
         @Override
-        public void setMusicList(List<MusicItem> list) {
+        public void setMusicList(MusicList<MusicItem> list) {
             mMusicList = list;
         }
 

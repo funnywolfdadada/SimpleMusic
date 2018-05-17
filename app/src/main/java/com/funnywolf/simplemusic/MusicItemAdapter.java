@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.funnywolf.simplemusic.Database.MusicItem;
+import com.funnywolf.simplemusic.Database.MusicList;
 
 import java.util.List;
 
@@ -17,15 +18,15 @@ import java.util.List;
 
 public class MusicItemAdapter extends BaseAdapter {
 
-    private List<MusicItem> mList;
+    private MusicList<MusicItem> mList;
     private LayoutInflater mLayoutInflater;
 
-    public MusicItemAdapter(Context context, List<MusicItem> list) {
+    public MusicItemAdapter(Context context, MusicList<MusicItem> list) {
         mList = list;
         mLayoutInflater = LayoutInflater.from(context);
     }
 
-    public void setList(List<MusicItem> list) {
+    public void setList(MusicList<MusicItem> list) {
         mList = list;
     }
 

@@ -33,4 +33,9 @@ public class MusicItem {
                 "%.2fMB", size / 1024d / 1024d);
         currentTime = 0;
     }
+
+    @Override
+    public String toString() {
+        return title;
+    }
 }

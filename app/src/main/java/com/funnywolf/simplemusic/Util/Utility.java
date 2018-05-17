@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.funnywolf.simplemusic.Database.MusicItem;
+import com.funnywolf.simplemusic.Database.MusicList;
 import com.funnywolf.simplemusic.MainActivity;
 
 import org.json.JSONArray;
@@ -123,7 +124,7 @@ public class Utility {
         }).start();
     }
 
-    public static void getAllMusic(Activity activity, ArrayList<MusicItem> list) {
+    public static void getAllMusic(Activity activity, MusicList<MusicItem> list) {
         if(activity == null || list == null)
             return;
         Cursor cursor = activity.getContentResolver().

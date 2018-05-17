@@ -1,6 +1,7 @@
 package com.funnywolf.simplemusic;
 
 import com.funnywolf.simplemusic.Database.MusicItem;
+import com.funnywolf.simplemusic.Database.MusicList;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface MusicControl {
         LIST_LOOP_MODE, RANDOM_MODE, SINGLE_LOOP_MODE
     }
 
-    void setMusicList(List<MusicItem> list);
+    void setMusicList(MusicList<MusicItem> list);
     void setCurrentPosition(int position);
     int getCurrentPosition();
 

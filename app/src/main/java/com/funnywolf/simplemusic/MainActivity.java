@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.funnywolf.simplemusic.Database.MusicItem;
+import com.funnywolf.simplemusic.Database.MusicList;
 import com.funnywolf.simplemusic.Util.Utility;
 
 import java.io.File;
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity
      */
 
     @Override
-    public void onMusicListChange(List<MusicItem> list, int position) {
+    public void onMusicListChange(MusicList<MusicItem> list, int position) {
         if (mMusicController == null)
             return;
         mMusicController.setMusicList(list);
@@ -190,7 +191,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onMusicListPrepare(List<MusicItem> list, int position) {
+    public void onMusicListPrepare(MusicList<MusicItem> list, int position) {
         if (mMusicController == null)
             return;
         mMusicController.setMusicList(list);
@@ -200,7 +201,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onMusicItemClick(List<MusicItem> list, int position) {
+    public void onMusicItemClick(MusicList<MusicItem> list, int position) {
         if (mMusicController == null)
             return;
         mMusicController.setMusicList(list);

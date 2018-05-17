@@ -8,22 +8,23 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.funnywolf.simplemusic.Database.MusicListItem;
+import com.funnywolf.simplemusic.Database.MusicItem;
+import com.funnywolf.simplemusic.Database.MusicList;
 
 import java.util.List;
 import java.util.Locale;
 
-public class MusicListItemAdapter extends BaseAdapter {
+public class MusicListAdapter extends BaseAdapter {
 
-    private List<MusicListItem> mList;
+    private MusicList<MusicList<MusicItem>> mList;
     private LayoutInflater mLayoutInflater;
 
-    public MusicListItemAdapter(Context context, List<MusicListItem> list) {
+    public MusicListAdapter(Context context, MusicList<MusicList<MusicItem>> list) {
         mList = list;
         mLayoutInflater = LayoutInflater.from(context);
     }
 
-    public void setList(List<MusicListItem> list) {
+    public void setList(MusicList<MusicList<MusicItem>> list) {
         mList = list;
     }
 
@@ -46,7 +47,7 @@ public class MusicListItemAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
         if(view == null) {
-            view = mLayoutInflater.inflate(R.layout.music_list_item, null);
+            view = mLayoutInflater.inflate(R.layout.music_list, null);
             viewHolder = new ViewHolder();
             viewHolder.listNum = view.findViewById(R.id.list_num);
             viewHolder.listName = view.findViewById(R.id.list_name);
@@ -57,11 +58,11 @@ public class MusicListItemAdapter extends BaseAdapter {
             viewHolder = (ViewHolder)view.getTag();
         }
 
-        MusicListItem list = mList.get(i);
+        MusicList list = mList.get(i);
         viewHolder.listNum.setText(String.valueOf(i + 1));
         viewHolder.listName.setText(list.getName());
         viewHolder.listCapacity.setText(String.format(Locale.getDefault(),
-                "共 %d 首", list.getCapacity()));
+                "共 %d 首", list.size()));
         if(list.isPlaying()) {
             viewHolder.listPlaying.setVisibility(View.VISIBLE);
         }else {
