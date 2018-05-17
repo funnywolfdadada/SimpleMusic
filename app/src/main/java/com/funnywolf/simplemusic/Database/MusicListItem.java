@@ -1,11 +1,13 @@
-package com.funnywolf.simplemusic;
+package com.funnywolf.simplemusic.Database;
+
+import com.funnywolf.simplemusic.Database.MusicItem;
 
 import java.util.ArrayList;
 
 public class MusicListItem {
     private String name;
     private ArrayList<MusicItem> musicList;
-    private boolean isCurrentList;
+    private boolean isPlaying;
 
     public MusicListItem(String name) {
         this.name = name;
@@ -28,11 +30,11 @@ public class MusicListItem {
         return musicList == null ? 0 : musicList.size();
     }
 
-    public void setCurrentList(boolean currentList) {
-        isCurrentList = currentList;
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
     }
 
-    public boolean isCurrentList() {
-        return isCurrentList;
+    public boolean isPlaying() {
+        return isPlaying;
     }
 }

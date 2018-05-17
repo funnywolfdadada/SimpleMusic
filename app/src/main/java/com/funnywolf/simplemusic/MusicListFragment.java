@@ -1,32 +1,24 @@
 package com.funnywolf.simplemusic;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
+import com.funnywolf.simplemusic.Database.MusicItem;
+import com.funnywolf.simplemusic.Database.MusicListItem;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,16 +27,18 @@ public class MusicListFragment extends Fragment
 
     private static final String TAG = "MusicListFragment";
 
-    private Toolbar mToolbar;
     private TextView mListTitle;
     private ImageView mBackImageView;
     private ListView mMusicListView;
 
     private boolean inMusicList = false;
+
     private ArrayList<MusicListItem> mMusicLists;
-    private MusicListItemAdapter mMusicListItemAdapter;
+
     private MusicListItem mCurrentMusicListItem;
-    private ArrayList<MusicItem> mCurrentMusicList;
+    private MusicListItem mPlayingMusicListItem;
+
+    private MusicListItemAdapter mMusicListItemAdapter;
     private MusicItemAdapter mMusicItemAdapter;
 
     private MusicListCallback mMusicListCallback;
@@ -57,8 +51,6 @@ public class MusicListFragment extends Fragment
 
         View view = inflater.inflate(R.layout.music_list_layout, container, false);
 
-        mToolbar = view.findViewById(R.id.toolbar);
-
         (view.findViewById(R.id.list_title_layout)).setOnClickListener(this);
         mListTitle = view.findViewById(R.id.list_title);
         mBackImageView = view.findViewById(R.id.list_back);
@@ -69,9 +61,13 @@ public class MusicListFragment extends Fragment
 
         mMusicListCallback = (MusicListCallback) getActivity();
 
-        initMusicList();
-        updateFragment();
+        loadMusicList();
 
+        mMusicListItemAdapter = new MusicListItemAdapter(getActivity(), mMusicLists);
+        mMusicItemAdapter = new MusicItemAdapter(getActivity(),
+                mCurrentMusicListItem.getMusicList());
+
+        updateFragment();
         return view;
     }
 
@@ -87,18 +83,20 @@ public class MusicListFragment extends Fragment
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if(inMusicList) {
-            mMusicListCallback.onMusicItemClick(mCurrentMusicList, position);
+            mPlayingMusicListItem.setPlaying(false);
+            mPlayingMusicListItem = mCurrentMusicListItem;
+            mPlayingMusicListItem.setPlaying(true);
+            mMusicListCallback.onMusicItemClick(mPlayingMusicListItem.getMusicList(), position);
         }else {
             inMusicList = true;
             mCurrentMusicListItem = mMusicLists.get(position);
-            mCurrentMusicList = mCurrentMusicListItem.getMusicList();
             updateFragment();
         }
     }
 
     private void updateFragment() {
         if(inMusicList) {
-            mMusicItemAdapter.setList(mCurrentMusicList);
+            mMusicItemAdapter.setList(mCurrentMusicListItem.getMusicList());
             mMusicListView.setAdapter(mMusicItemAdapter);
             mListTitle.setText(String.format(Locale.getDefault(), "%s: 共 %d 首",
                     mCurrentMusicListItem.getName(), mCurrentMusicListItem.getCapacity()));
@@ -121,29 +119,27 @@ public class MusicListFragment extends Fragment
     }
 
     public void musicServiceConnected() {
-        mMusicListCallback.onMusicListPrepare(mCurrentMusicList, 0);
+        mMusicListCallback.onMusicListPrepare(mCurrentMusicListItem.getMusicList(), 0);
     }
 
-    private void initMusicList() {
+    private void loadMusicList() {
         mMusicLists = new ArrayList<>();
 
-        mCurrentMusicListItem = new MusicListItem("所有歌曲");
-        mCurrentMusicList = mCurrentMusicListItem.getMusicList();
-        getAllMusic(mCurrentMusicList);
+        MusicListItem listItem = new MusicListItem("所有歌曲");
+        getAllMusic(listItem.getMusicList());
+        mMusicLists.add(listItem);
+        mPlayingMusicListItem = listItem;
+        mCurrentMusicListItem = listItem;
 
-        mMusicLists.add(mCurrentMusicListItem);
-        mMusicLists.add(new MusicListItem("新建歌单1"));
-        mMusicLists.add(new MusicListItem("新建歌单2"));
-
-        mMusicListItemAdapter = new MusicListItemAdapter(getActivity(), mMusicLists);
-        mMusicItemAdapter = new MusicItemAdapter(getActivity(), mCurrentMusicList);
+        listItem = new MusicListItem("新建歌单1");
+        listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(11));
+        mMusicLists.add(listItem);
+        listItem = new MusicListItem("新建歌单2");
+        listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(22));
+        mMusicLists.add(listItem);
     }
 
-    public void loadMusicList() {
-
-    }
-
-    public void saveMusicList() {
+    private void saveMusicList() {
     }
 
     private void getAllMusic(ArrayList<MusicItem> list) {

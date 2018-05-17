@@ -1,4 +1,4 @@
-package com.funnywolf.simplemusic;
+package com.funnywolf.simplemusic.Database;
 
 import java.util.Locale;
 

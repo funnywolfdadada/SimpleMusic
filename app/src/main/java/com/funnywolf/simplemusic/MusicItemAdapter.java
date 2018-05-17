@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.funnywolf.simplemusic.Database.MusicItem;
+
 import java.util.List;
-import java.util.Locale;
-import java.util.zip.Inflater;
 
 /**
  * Created by dell on 2018/5/9.

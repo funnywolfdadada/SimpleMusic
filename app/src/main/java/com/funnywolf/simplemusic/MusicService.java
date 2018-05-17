@@ -9,18 +9,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.widget.Button;
 import android.widget.RemoteViews;
 
+import com.funnywolf.simplemusic.Database.MusicItem;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MusicService extends Service {

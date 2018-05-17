@@ -5,7 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.funnywolf.simplemusic.Database.MusicListItem;
 
 import java.util.List;
 import java.util.Locale;
@@ -48,6 +51,7 @@ public class MusicListItemAdapter extends BaseAdapter {
             viewHolder.listNum = view.findViewById(R.id.list_num);
             viewHolder.listName = view.findViewById(R.id.list_name);
             viewHolder.listCapacity = view.findViewById(R.id.list_capacity);
+            viewHolder.listPlaying = view.findViewById(R.id.list_playing);
             view.setTag(viewHolder);
         }else {
             viewHolder = (ViewHolder)view.getTag();
@@ -58,6 +62,11 @@ public class MusicListItemAdapter extends BaseAdapter {
         viewHolder.listName.setText(list.getName());
         viewHolder.listCapacity.setText(String.format(Locale.getDefault(),
                 "共 %d 首", list.getCapacity()));
+        if(list.isPlaying()) {
+            viewHolder.listPlaying.setVisibility(View.VISIBLE);
+        }else {
+            viewHolder.listPlaying.setVisibility(View.INVISIBLE);
+        }
 
         return view;
     }
@@ -66,6 +75,7 @@ public class MusicListItemAdapter extends BaseAdapter {
         private TextView listNum;
         private TextView listName;
         private TextView listCapacity;
+        private ImageView listPlaying;
     }
 }
 

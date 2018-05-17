@@ -44,4 +44,17 @@
 
     </LinearLayout>
 
+    <RelativeLayout
+        android:orientation="vertical"
+        android:background="#3000"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/list_playing"
+            android:background="@drawable/ic_playing"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
 </LinearLayout>

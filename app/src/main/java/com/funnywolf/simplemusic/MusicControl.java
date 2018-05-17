@@ -1,5 +1,7 @@
 package com.funnywolf.simplemusic;
 
+import com.funnywolf.simplemusic.Database.MusicItem;
+
 import java.util.List;
 
 /**
