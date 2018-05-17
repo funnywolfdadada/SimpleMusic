@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class MusicListItem {
     private String name;
     private ArrayList<MusicItem> musicList;
+    private boolean isCurrentList;
 
     public MusicListItem(String name) {
         this.name = name;
@@ -23,11 +24,15 @@ public class MusicListItem {
         return musicList;
     }
 
-    public void setMusicList(ArrayList<MusicItem> musicList) {
-        this.musicList = musicList;
-    }
-
     public int getCapacity() {
         return musicList == null ? 0 : musicList.size();
+    }
+
+    public void setCurrentList(boolean currentList) {
+        isCurrentList = currentList;
+    }
+
+    public boolean isCurrentList() {
+        return isCurrentList;
     }
 }

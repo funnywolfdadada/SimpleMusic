@@ -81,44 +81,42 @@ public class Utility {
             public void run() {
 
                 Message msg = Message.obtain(handler, MainActivity.MSG_BACKGROUND, "");
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",
-                        Locale.getDefault());
-                String imagePath = String.format(Locale.getDefault(),
-                        "%s/BingPic_%s.jpg",
-                        Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_PICTURES).getPath(),
-                        sdf.format(new Date()));
-                File imageFile = new File(imagePath);
-                if(!imageFile.exists()) {
-                    String responseString = getOkHttpResponseString(requestBingPic);
-                    if(responseString == null) {
-                        handler.sendMessage(msg);
-                        return;
+                do {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",
+                            Locale.getDefault());
+                    String imagePath = String.format(Locale.getDefault(),
+                            "%s/BingPic_%s.jpg",
+                            Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_PICTURES).getPath(),
+                            sdf.format(new Date()));
+                    File imageFile = new File(imagePath);
+                    if (!imageFile.exists()) {
+                        String responseString = getOkHttpResponseString(requestBingPic);
+                        if (responseString == null) {
+                            break;
+                        }
+                        String partUrl;
+                        try {
+                            JSONObject jsonObject = new JSONObject(responseString);
+                            JSONArray jsonArray = jsonObject.getJSONArray("images");
+                            partUrl = jsonArray.getJSONObject(0).getString("url");
+                        } catch (JSONException e) {
+                            break;
+                        }
+                        String imageUrl = "https://www.bing.com" + partUrl;
+                        byte[] bytes = getOkHttpResponseBytes(imageUrl);
+                        if (bytes == null) {
+                            break;
+                        }
+                        try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                            fos.write(bytes);
+                            fos.flush();
+                        } catch (IOException e) {
+                            break;
+                        }
                     }
-                    String partUrl;
-                    try {
-                        JSONObject jsonObject = new JSONObject(responseString);
-                        JSONArray jsonArray = jsonObject.getJSONArray("images");
-                        partUrl = jsonArray.getJSONObject(0).getString("url");
-                    } catch (JSONException e) {
-                        handler.sendMessage(msg);
-                        return;
-                    }
-                    String imageUrl = "https://www.bing.com" + partUrl;
-                    byte[] bytes = getOkHttpResponseBytes(imageUrl);
-                    if(bytes == null) {
-                        handler.sendMessage(msg);
-                        return;
-                    }
-                    try (FileOutputStream fos = new FileOutputStream(imageFile)) {
-                        fos.write(bytes);
-                        fos.flush();
-                    } catch (IOException e) {
-                        handler.sendMessage(msg);
-                        return;
-                    }
-                }
-                msg.obj = imagePath;
+                    msg.obj = imagePath;
+                }while (false);
                 handler.sendMessage(msg);
 
             }

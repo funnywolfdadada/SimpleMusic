@@ -58,62 +58,30 @@ public class MusicListFragment extends Fragment
         View view = inflater.inflate(R.layout.music_list_layout, container, false);
 
         mToolbar = view.findViewById(R.id.toolbar);
-        mMusicListView = view.findViewById(R.id.music_list);
+
+        (view.findViewById(R.id.list_title_layout)).setOnClickListener(this);
         mListTitle = view.findViewById(R.id.list_title);
         mBackImageView = view.findViewById(R.id.list_back);
-        mBackImageView.setVisibility(View.INVISIBLE);
-        (view.findViewById(R.id.list_title_layout)).setOnClickListener(this);
 
-        ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
-        setHasOptionsMenu(true);
+        mMusicListView = view.findViewById(R.id.music_list);
+        mMusicListView.setOnItemClickListener(this);
+        mMusicListView.setOnTouchListener(this);
 
         mMusicListCallback = (MusicListCallback) getActivity();
 
         initMusicList();
+        updateFragment();
 
         return view;
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.add_list:
-                Log.d(TAG, "onOptionsItemSelected: add_list");
-                break;
-            case R.id.setting_background:
-                mMusicListCallback.onChangeBackground(false);
-                break;
-            case R.id.update_background:
-                mMusicListCallback.onChangeBackground(true);
-                break;
-        }
-        return true;
-    }
-
-    @Override
     public void onClick(View v) {
-        onBackTouch();
+        if(inMusicList) {
+            onBackTouch();
+        }else {
+
+        }
     }
 
     @Override
@@ -124,21 +92,29 @@ public class MusicListFragment extends Fragment
             inMusicList = true;
             mCurrentMusicListItem = mMusicLists.get(position);
             mCurrentMusicList = mCurrentMusicListItem.getMusicList();
+            updateFragment();
+        }
+    }
+
+    private void updateFragment() {
+        if(inMusicList) {
             mMusicItemAdapter.setList(mCurrentMusicList);
             mMusicListView.setAdapter(mMusicItemAdapter);
             mListTitle.setText(String.format(Locale.getDefault(), "%s: 共 %d 首",
                     mCurrentMusicListItem.getName(), mCurrentMusicListItem.getCapacity()));
-            mBackImageView.setVisibility(View.VISIBLE);
+            mBackImageView.setBackgroundResource(R.drawable.ic_back);
+        }else {
+            mMusicListItemAdapter.setList(mMusicLists);
+            mMusicListView.setAdapter(mMusicListItemAdapter);
+            mListTitle.setText("歌单: " + mMusicLists.size());
+            mBackImageView.setBackgroundResource(R.drawable.ic_add_list);
         }
     }
 
     public boolean onBackTouch() {
         if(inMusicList) {
             inMusicList = false;
-            mMusicListItemAdapter.setList(mMusicLists);
-            mMusicListView.setAdapter(mMusicListItemAdapter);
-            mListTitle.setText("歌单: " + mMusicLists.size());
-            mBackImageView.setVisibility(View.INVISIBLE);
+            updateFragment();
             return false;
         }
         return true;
@@ -152,34 +128,15 @@ public class MusicListFragment extends Fragment
         mMusicLists = new ArrayList<>();
 
         mCurrentMusicListItem = new MusicListItem("所有歌曲");
-        getAllMusic(mCurrentMusicListItem);
+        mCurrentMusicList = mCurrentMusicListItem.getMusicList();
+        getAllMusic(mCurrentMusicList);
+
         mMusicLists.add(mCurrentMusicListItem);
         mMusicLists.add(new MusicListItem("新建歌单1"));
         mMusicLists.add(new MusicListItem("新建歌单2"));
 
-        mCurrentMusicList = mCurrentMusicListItem.getMusicList();
-
         mMusicListItemAdapter = new MusicListItemAdapter(getActivity(), mMusicLists);
-
         mMusicItemAdapter = new MusicItemAdapter(getActivity(), mCurrentMusicList);
-
-        mMusicListView.setAdapter(mMusicListItemAdapter);
-        mMusicListView.setOnItemClickListener(this);
-        mMusicListView.setOnTouchListener(this);
-        mListTitle.setText("歌单: " + mMusicLists.size());
-
-        Cursor cursor = getActivity().getContentResolver().
-                query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        null,
-                        MediaStore.Audio.Media._ID + "=?",
-                        new String[]{"111"},
-                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if(cursor != null && cursor.moveToFirst()) {
-            Log.d(TAG, "initMusicList: found");
-            cursor.close();
-        }else {
-            Log.d(TAG, "initMusicList: not found");
-        }
     }
 
     public void loadMusicList() {
@@ -189,8 +146,7 @@ public class MusicListFragment extends Fragment
     public void saveMusicList() {
     }
 
-    private void getAllMusic(MusicListItem listItem) {
-        ArrayList<MusicItem> list = listItem.getMusicList();
+    private void getAllMusic(ArrayList<MusicItem> list) {
         Cursor cursor = getActivity().getContentResolver().
                 query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         null, null, null,
@@ -211,7 +167,7 @@ public class MusicListFragment extends Fragment
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                 Long size = cursor.getLong(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                list.add(new MusicItem(listItem, id, name, title, artist, path, duration, size));
+                list.add(new MusicItem(id, name, title, artist, path, duration, size));
                 cursor.moveToNext();
             }
             cursor.close();
@@ -239,11 +195,9 @@ public class MusicListFragment extends Fragment
                 if(lastY > mFirstY && mLastDirection) {
                     mLastDirection = false;
                     mMusicListCallback.onSlideDirectionChange(false);
-                    mToolbar.setVisibility(View.VISIBLE);
                 }else if(lastY < mFirstY && !mLastDirection) {
                     mLastDirection = true;
                     mMusicListCallback.onSlideDirectionChange(true);
-                    mToolbar.setVisibility(View.GONE);
                 }
                 break;
         }
@@ -256,6 +210,5 @@ public class MusicListFragment extends Fragment
         void onMusicListPrepare(List<MusicItem> list, int position);
         void onMusicItemClick(List<MusicItem> list, int position);
         void onSlideDirectionChange(boolean slideUp);
-        void onChangeBackground(boolean update);
     }
 }

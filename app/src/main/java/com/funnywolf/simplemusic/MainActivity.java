@@ -13,7 +13,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -30,15 +35,18 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "SimpleMusic";
 
+    public static final int MSG_BACKGROUND = 1;
+
+    private Toolbar mToolbar;
+    private ImageView mImageView;
+
+    private Handler mHandler;
+
     private FragmentManager mFragmentManager;
     private MusicPanelFragment mMusicPanelFragment;
     private MusicListFragment mMusicListFragment;
 
     private static MusicControl mMusicController;
-
-    private Handler mHandler;
-
-    private ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +54,11 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         mImageView = findViewById(R.id.background);
+
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
+        mHandler = new Handler(this);
 
         mFragmentManager = getSupportFragmentManager();
         mMusicPanelFragment = (MusicPanelFragment) mFragmentManager.
@@ -56,8 +69,6 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MusicService.class);
         startService(intent);
         bindService(intent, this, BIND_AUTO_CREATE);
-
-        mHandler = new Handler(this);
 
         SharedPreferences preferences = getSharedPreferences("SimpleMusic", MODE_PRIVATE);
         String background = preferences.getString("background", null);
@@ -82,7 +93,41 @@ public class MainActivity extends AppCompatActivity
             moveTaskToBack(false);
     }
 
-    public static final int MSG_BACKGROUND = 1;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.setting_background:
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent, MSG_BACKGROUND);
+                break;
+            case R.id.update_background:
+                Utility.loadBingPicture(mHandler);
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(data == null)
+            return;
+        switch (requestCode) {
+            case MSG_BACKGROUND:
+                mHandler.sendMessage(Message.obtain(mHandler, MSG_BACKGROUND,
+                        data.getData()));
+                break;
+            default:
+                break;
+        }
+    }
+
     @Override
     public boolean handleMessage(Message msg) {
         if(isFinishing())
@@ -168,39 +213,15 @@ public class MainActivity extends AppCompatActivity
     public void onSlideDirectionChange(boolean slideUp) {
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
         if(slideUp) {
+            mToolbar.setVisibility(View.GONE);
             fragmentTransaction.hide(mMusicPanelFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
         }else {
+            mToolbar.setVisibility(View.VISIBLE);
             fragmentTransaction.show(mMusicPanelFragment)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         }
         fragmentTransaction.commit();
-    }
-
-    private static final int SELECT_PICTURE_CODE = 111;
-    @Override
-    public void onChangeBackground(boolean update) {
-        if(update) {
-            Utility.loadBingPicture(mHandler);
-        }else {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            startActivityForResult(intent, SELECT_PICTURE_CODE);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(data == null)
-            return;
-        switch (requestCode) {
-            case SELECT_PICTURE_CODE:
-                mHandler.sendMessage(Message.obtain(mHandler, MSG_BACKGROUND,
-                        data.getData()));
-                break;
-            default:
-                break;
-        }
     }
 
     /**

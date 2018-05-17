@@ -7,8 +7,6 @@ import java.util.Locale;
  */
 
 public class MusicItem {
-    public final MusicListItem musicList;
-
     public final long id;
     public final String name;
     public final String title;
@@ -20,10 +18,9 @@ public class MusicItem {
 
     public int currentTime;
 
-    public MusicItem(MusicListItem list, long id, String name, String title, String artist,
+    public MusicItem(long id, String name, String title, String artist,
                      String path, int duration, long size){
         this.id = id;
-        this.musicList = list;
         this.name = name;
         this.title = title;
         this.artist = artist;
@@ -36,18 +33,4 @@ public class MusicItem {
                 "%.2fMB", size / 1024d / 1024d);
         currentTime = 0;
     }
-
-    public MusicItem(MusicListItem list, MusicItem music) {
-        this.musicList = list;
-        this.id = music.id;
-        this.name = music.name;
-        this.title = music.title;
-        this.artist = music.artist;
-        this.path = music.path;
-        this.durationInt = music.durationInt;
-        this.duration = music.duration;
-        this.size = music.size;
-        currentTime = 0;
-    }
-
 }
