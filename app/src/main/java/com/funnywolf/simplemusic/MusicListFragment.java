@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.funnywolf.simplemusic.Database.MusicItem;
 import com.funnywolf.simplemusic.Database.MusicListItem;
+import com.funnywolf.simplemusic.Util.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,8 @@ public class MusicListFragment extends Fragment
     private ImageView mBackImageView;
     private ListView mMusicListView;
 
+    private MusicListCallback mMusicListCallback;
+
     private boolean inMusicList = false;
 
     private ArrayList<MusicListItem> mMusicLists;
@@ -40,8 +43,6 @@ public class MusicListFragment extends Fragment
 
     private MusicListItemAdapter mMusicListItemAdapter;
     private MusicItemAdapter mMusicItemAdapter;
-
-    private MusicListCallback mMusicListCallback;
 
 
     @Nullable
@@ -65,12 +66,15 @@ public class MusicListFragment extends Fragment
 
         mMusicListItemAdapter = new MusicListItemAdapter(getActivity(), mMusicLists);
         mMusicItemAdapter = new MusicItemAdapter(getActivity(),
-                mCurrentMusicListItem.getMusicList());
+                mPlayingMusicListItem.getMusicList());
 
         updateFragment();
         return view;
     }
 
+    /**
+     * for list_title_layout
+     */
     @Override
     public void onClick(View v) {
         if(inMusicList) {
@@ -80,6 +84,9 @@ public class MusicListFragment extends Fragment
         }
     }
 
+    /**
+     * for ListView
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if(inMusicList) {
@@ -109,6 +116,32 @@ public class MusicListFragment extends Fragment
         }
     }
 
+    private void loadMusicList() {
+        mMusicLists = new ArrayList<>();
+
+        MusicListItem listItem = new MusicListItem("所有歌曲");
+        Utility.getAllMusic(getActivity(), listItem.getMusicList());
+        mMusicLists.add(listItem);
+        mPlayingMusicListItem = listItem;
+        mCurrentMusicListItem = listItem;
+
+        listItem = new MusicListItem("新建歌单1");
+        for(int i = 0; i < 10; i++) {
+            listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(11 + 5 * i));
+        }
+        mMusicLists.add(listItem);
+        listItem = new MusicListItem("新建歌单2");
+        for(int i = 0; i < 10; i++) {
+            listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(22 + 5 * i));
+        }
+        mMusicLists.add(listItem);
+
+        mPlayingMusicListItem.setPlaying(true);
+    }
+
+    private void saveMusicList() {
+    }
+
     public boolean onBackTouch() {
         if(inMusicList) {
             inMusicList = false;
@@ -122,53 +155,6 @@ public class MusicListFragment extends Fragment
         mMusicListCallback.onMusicListPrepare(mCurrentMusicListItem.getMusicList(), 0);
     }
 
-    private void loadMusicList() {
-        mMusicLists = new ArrayList<>();
-
-        MusicListItem listItem = new MusicListItem("所有歌曲");
-        getAllMusic(listItem.getMusicList());
-        mMusicLists.add(listItem);
-        mPlayingMusicListItem = listItem;
-        mCurrentMusicListItem = listItem;
-
-        listItem = new MusicListItem("新建歌单1");
-        listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(11));
-        mMusicLists.add(listItem);
-        listItem = new MusicListItem("新建歌单2");
-        listItem.getMusicList().add(mPlayingMusicListItem.getMusicList().get(22));
-        mMusicLists.add(listItem);
-    }
-
-    private void saveMusicList() {
-    }
-
-    private void getAllMusic(ArrayList<MusicItem> list) {
-        Cursor cursor = getActivity().getContentResolver().
-                query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        null, null, null,
-                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if(cursor != null && cursor.moveToFirst()) {
-            while(!cursor.isAfterLast()){
-                long id = cursor.getLong(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
-                String name = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
-                String title = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                String artist = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                String path = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                int duration = cursor.getInt(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                Long size = cursor.getLong(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                list.add(new MusicItem(id, name, title, artist, path, duration, size));
-                cursor.moveToNext();
-            }
-            cursor.close();
-        }
-    }
 
     /**
      * last slide direction

@@ -92,27 +92,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.setting_background:
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(intent, MSG_BACKGROUND);
-                break;
-            case R.id.update_background:
-                Utility.loadBingPicture(mHandler);
-                break;
-        }
-        return true;
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(data == null)
             return;
@@ -154,6 +133,30 @@ public class MainActivity extends AppCompatActivity
                 break;
             default:
                 return false;
+        }
+        return true;
+    }
+
+    /**
+     * for Toolbar' menu
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.setting_background:
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent, MSG_BACKGROUND);
+                break;
+            case R.id.update_background:
+                Utility.loadBingPicture(mHandler);
+                break;
         }
         return true;
     }
