@@ -16,7 +16,7 @@
 
     <item
         android:id="@+id/update_background"
-        android:title="更新背景"
+        android:title="今日美图"
         app:showAsAction="never"/>
 
 </menu>

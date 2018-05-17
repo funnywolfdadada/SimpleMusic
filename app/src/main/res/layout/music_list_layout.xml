@@ -15,14 +15,29 @@
         android:layout_height="50dp">
     </android.support.v7.widget.Toolbar>
 
-    <TextView
-        android:id="@+id/list_title"
-        android:text="title"
-        android:textSize="20sp"
-        android:textColor="#fff"
+    <LinearLayout
+        android:id="@+id/list_title_layout"
         android:background="#8000"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="40dp">
+        <TextView
+            android:id="@+id/list_title"
+            android:text="title"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/list_back"
+            android:background="@drawable/ic_back"
+            android:layout_marginEnd="10dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/music_list"

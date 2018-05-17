@@ -3,22 +3,29 @@ package com.funnywolf.simplemusic;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.UriMatcher;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.funnywolf.simplemusic.Util.Utility;
 
+import java.io.File;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements ServiceConnection, MusicListFragment.MusicListCallback,
+        implements Handler.Callback, ServiceConnection, MusicListFragment.MusicListCallback,
         MusicPanelFragment.MusicPanelCallback {
 
     private static final String TAG = "SimpleMusic";
@@ -28,6 +35,8 @@ public class MainActivity extends AppCompatActivity
     private MusicListFragment mMusicListFragment;
 
     private static MusicControl mMusicController;
+
+    private Handler mHandler;
 
     private ImageView mImageView;
 
@@ -47,12 +56,63 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MusicService.class);
         startService(intent);
         bindService(intent, this, BIND_AUTO_CREATE);
+
+        mHandler = new Handler(this);
+
+        SharedPreferences preferences = getSharedPreferences("SimpleMusic", MODE_PRIVATE);
+        String background = preferences.getString("background", null);
+        if(background != null) {
+            if(background.charAt(0) == '/') {
+                mHandler.sendMessage(Message.obtain(mHandler, MSG_BACKGROUND, background));
+            }else {
+                mHandler.sendMessage(Message.obtain(mHandler, MSG_BACKGROUND,
+                        Uri.parse(background)));
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
         if(mMusicListFragment.onBackTouch())
-            super.onBackPressed();
+            moveTaskToBack(false);
+    }
+
+    public static final int MSG_BACKGROUND = 1;
+    @Override
+    public boolean handleMessage(Message msg) {
+        if(isFinishing())
+            return false;
+        switch (msg.what) {
+            case MSG_BACKGROUND:
+                if(msg.obj == null) {
+                    break;
+                }
+                if("".equals(msg.obj.toString())) {
+                    Toast.makeText(this, "加载图片失败", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                if(msg.obj.toString().charAt(0) == '/') {
+                    Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    Uri uri = Uri.fromFile(new File(msg.obj.toString()));
+                    intent.setData(uri);
+                    sendBroadcast(intent);
+                }
+                SharedPreferences.Editor editor = getSharedPreferences("SimpleMusic",
+                        MODE_PRIVATE).edit();
+                editor.putString("background", msg.obj.toString());
+                editor.apply();
+                RequestOptions options = new RequestOptions().centerCrop();
+                Glide.with(this).load(msg.obj).apply(options).into(mImageView);
+                break;
+            default:
+                return false;
+        }
+        return true;
     }
 
     /**
@@ -121,9 +181,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onChangeBackground(boolean update) {
         if(update) {
-            Utility.loadBingPicture(this, mImageView);
+            Utility.loadBingPicture(mHandler);
         }else {
-            Intent intent = new Intent(Intent.ACTION_PICK);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
             startActivityForResult(intent, SELECT_PICTURE_CODE);
         }
@@ -135,8 +195,8 @@ public class MainActivity extends AppCompatActivity
             return;
         switch (requestCode) {
             case SELECT_PICTURE_CODE:
-                RequestOptions options = new RequestOptions().centerCrop();
-                Glide.with(this).load(data.getData()).apply(options).into(mImageView);
+                mHandler.sendMessage(Message.obtain(mHandler, MSG_BACKGROUND,
+                        data.getData()));
                 break;
             default:
                 break;

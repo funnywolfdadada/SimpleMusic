@@ -1,5 +1,7 @@
 package com.funnywolf.simplemusic;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -16,6 +18,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -27,24 +31,24 @@ import java.util.List;
 import java.util.Locale;
 
 public class MusicListFragment extends Fragment
-    implements AdapterView.OnItemClickListener, View.OnTouchListener{
+    implements View.OnClickListener, AdapterView.OnItemClickListener, View.OnTouchListener{
 
     private static final String TAG = "MusicListFragment";
 
     private Toolbar mToolbar;
     private TextView mListTitle;
+    private ImageView mBackImageView;
     private ListView mMusicListView;
 
     private boolean inMusicList = false;
-    private MusicListItemAdapter mMusicListItemAdapter;
     private ArrayList<MusicListItem> mMusicLists;
+    private MusicListItemAdapter mMusicListItemAdapter;
     private MusicListItem mCurrentMusicListItem;
-    private MusicItemAdapter mMusicItemAdapter;
     private ArrayList<MusicItem> mCurrentMusicList;
+    private MusicItemAdapter mMusicItemAdapter;
 
     private MusicListCallback mMusicListCallback;
 
-    private static Gson mGson = new Gson();
 
     @Nullable
     @Override
@@ -56,6 +60,9 @@ public class MusicListFragment extends Fragment
         mToolbar = view.findViewById(R.id.toolbar);
         mMusicListView = view.findViewById(R.id.music_list);
         mListTitle = view.findViewById(R.id.list_title);
+        mBackImageView = view.findViewById(R.id.list_back);
+        mBackImageView.setVisibility(View.INVISIBLE);
+        (view.findViewById(R.id.list_title_layout)).setOnClickListener(this);
 
         ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
         setHasOptionsMenu(true);
@@ -65,6 +72,17 @@ public class MusicListFragment extends Fragment
         initMusicList();
 
         return view;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -94,6 +112,11 @@ public class MusicListFragment extends Fragment
     }
 
     @Override
+    public void onClick(View v) {
+        onBackTouch();
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if(inMusicList) {
             mMusicListCallback.onMusicItemClick(mCurrentMusicList, position);
@@ -105,6 +128,7 @@ public class MusicListFragment extends Fragment
             mMusicListView.setAdapter(mMusicItemAdapter);
             mListTitle.setText(String.format(Locale.getDefault(), "%s: 共 %d 首",
                     mCurrentMusicListItem.getName(), mCurrentMusicListItem.getCapacity()));
+            mBackImageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -114,6 +138,7 @@ public class MusicListFragment extends Fragment
             mMusicListItemAdapter.setList(mMusicLists);
             mMusicListView.setAdapter(mMusicListItemAdapter);
             mListTitle.setText("歌单: " + mMusicLists.size());
+            mBackImageView.setVisibility(View.INVISIBLE);
             return false;
         }
         return true;
@@ -129,6 +154,8 @@ public class MusicListFragment extends Fragment
         mCurrentMusicListItem = new MusicListItem("所有歌曲");
         getAllMusic(mCurrentMusicListItem);
         mMusicLists.add(mCurrentMusicListItem);
+        mMusicLists.add(new MusicListItem("新建歌单1"));
+        mMusicLists.add(new MusicListItem("新建歌单2"));
 
         mCurrentMusicList = mCurrentMusicListItem.getMusicList();
 
@@ -141,14 +168,25 @@ public class MusicListFragment extends Fragment
         mMusicListView.setOnTouchListener(this);
         mListTitle.setText("歌单: " + mMusicLists.size());
 
+        Cursor cursor = getActivity().getContentResolver().
+                query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        null,
+                        MediaStore.Audio.Media._ID + "=?",
+                        new String[]{"111"},
+                        MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        if(cursor != null && cursor.moveToFirst()) {
+            Log.d(TAG, "initMusicList: found");
+            cursor.close();
+        }else {
+            Log.d(TAG, "initMusicList: not found");
+        }
     }
 
-    private void loadMusicList() {
+    public void loadMusicList() {
 
     }
 
-    private void saveMusicList() {
-
+    public void saveMusicList() {
     }
 
     private void getAllMusic(MusicListItem listItem) {
@@ -159,6 +197,8 @@ public class MusicListFragment extends Fragment
                         MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         if(cursor != null && cursor.moveToFirst()) {
             while(!cursor.isAfterLast()){
+                long id = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
                 String name = cursor.getString(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
                 String title = cursor.getString(
@@ -171,7 +211,7 @@ public class MusicListFragment extends Fragment
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                 Long size = cursor.getLong(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                list.add(new MusicItem(listItem, name, title, artist, path, duration, size));
+                list.add(new MusicItem(listItem, id, name, title, artist, path, duration, size));
                 cursor.moveToNext();
             }
             cursor.close();
