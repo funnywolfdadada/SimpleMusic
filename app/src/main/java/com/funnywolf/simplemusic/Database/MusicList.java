@@ -44,6 +44,10 @@ public class MusicList<T> {
         return set.contains(name);
     }
 
+    public int indexOf(T item) {
+        return list.indexOf(item);
+    }
+
     public boolean add(T item) {
         String name;
         if(item == null || set.contains(name = item.toString()))
@@ -65,6 +69,14 @@ public class MusicList<T> {
             return;
         set.remove(list.get(position).toString());
         list.remove(position);
+    }
+
+    public boolean rename(int position, String name) {
+        if(position < 0 || position >= list.size() || set.contains(name))
+            return false;
+        set.remove(list.get(position).toString());
+        set.add(name);
+        return true;
     }
 
     public String[] getAllItemsName() {
