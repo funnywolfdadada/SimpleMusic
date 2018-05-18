@@ -1,5 +1,7 @@
 package com.funnywolf.simplemusic;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,9 +10,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.funnywolf.simplemusic.Database.MusicItem;
 import com.funnywolf.simplemusic.Database.MusicList;
@@ -21,7 +25,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class MusicListFragment extends Fragment
-    implements View.OnClickListener, AdapterView.OnItemClickListener, View.OnTouchListener{
+    implements View.OnClickListener, AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener, View.OnTouchListener{
 
     private static final String TAG = "MusicListFragment";
 
@@ -39,6 +44,42 @@ public class MusicListFragment extends Fragment
     private MusicListAdapter mMusicListAdapter;
     private MusicItemAdapter mMusicItemAdapter;
 
+    private EditText dialogEditText;
+    private AlertDialog addMusicListDialog;
+    private AlertDialog musicListLongClockDialog;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        dialogEditText = new EditText(getActivity());
+        dialogEditText.setHint("新建歌单" + mMusicLists.size());
+        addMusicListDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("新建歌单")
+                .setNegativeButton("cancel", null)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String str = dialogEditText.getText().toString();
+                        if("".equals(str))
+                            str = dialogEditText.getHint().toString();
+                        addMusicList(str);
+                        dialogEditText.setText("");
+                        dialogEditText.setHint("新建歌单" + mMusicLists.size());
+                    }
+                })
+                .setView(dialogEditText)
+                .create();
+        musicListLongClockDialog = new AlertDialog.Builder(getActivity())
+                .setItems(new String[]{}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .create();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -52,6 +93,7 @@ public class MusicListFragment extends Fragment
 
         mMusicListView = view.findViewById(R.id.music_list);
         mMusicListView.setOnItemClickListener(this);
+        mMusicListView.setOnItemLongClickListener(this);
         mMusicListView.setOnTouchListener(this);
 
         mMusicListCallback = (MusicListCallback) getActivity();
@@ -74,7 +116,7 @@ public class MusicListFragment extends Fragment
         if(inMusicList) {
             onBackTouch();
         }else {
-
+            addMusicListDialog.show();
         }
     }
 
@@ -95,6 +137,12 @@ public class MusicListFragment extends Fragment
         }
     }
 
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+        return true;
+    }
+
     private void updateFragment() {
         if(inMusicList) {
             mMusicItemAdapter.setList(mCurrentMusicList);
@@ -108,6 +156,8 @@ public class MusicListFragment extends Fragment
             mListTitle.setText("歌单: " + mMusicLists.size());
             mBackImageView.setBackgroundResource(R.drawable.ic_add_list);
         }
+        mMusicListAdapter.notifyDataSetChanged();
+        mMusicItemAdapter.notifyDataSetChanged();
     }
 
     private void loadMusicList() {
@@ -119,25 +169,16 @@ public class MusicListFragment extends Fragment
         mPlayingMusicList = listItem;
         mCurrentMusicList = listItem;
 
-        listItem = new MusicList<>("新建歌单1");
-        for(int i = 0; i < 10; i++) {
-            listItem.add(mPlayingMusicList.get(11 + 5 * i));
-        }
-        mMusicLists.add(listItem);
-        listItem = new MusicList<>("新建歌单2");
-        for(int i = 0; i < 10; i++) {
-            listItem.add(mPlayingMusicList.get(22 + 5 * i));
-        }
-        mMusicLists.add(listItem);
-        mMusicLists.add(new MusicList<MusicItem>("新建歌单1"));
-        mMusicLists.add(new MusicList<MusicItem>("新建歌单1"));
-        mMusicLists.add(new MusicList<MusicItem>("新建歌单1"));
-
         mPlayingMusicList.setPlaying(true);
     }
 
-    private boolean addMusicList(MusicList<MusicItem> list) {
-        return false;
+    private void addMusicList(String name) {
+        if(mMusicLists.contains(name)) {
+            Toast.makeText(getActivity(), name + "已经存在！", Toast.LENGTH_SHORT).show();
+        }else {
+            mMusicLists.add(new MusicList<MusicItem>(name));
+            updateFragment();
+        }
     }
 
     public boolean onBackTouch() {

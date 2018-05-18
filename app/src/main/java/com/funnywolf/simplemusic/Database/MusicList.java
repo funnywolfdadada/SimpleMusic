@@ -40,33 +40,39 @@ public class MusicList<T> {
         return list.get(position);
     }
 
-    public boolean contains(T item) {
-        String str;
-        return (item != null) && ((str = item.toString()) != null) && set.contains(str);
+    public boolean contains(String name) {
+        return set.contains(name);
     }
 
     public boolean add(T item) {
-        if(contains(item))
+        String name;
+        if(item == null || set.contains(name = item.toString()))
             return false;
-        set.add(item.toString());
+        set.add(name);
         list.add(item);
         return true;
     }
 
     public void remove(T item) {
+        if (item == null)
+            return;
         list.remove(item);
+        set.remove(item.toString());
     }
 
     public void remove(int position) {
+        if(position < 0 || position >= list.size())
+            return;
+        set.remove(list.get(position).toString());
         list.remove(position);
     }
 
-    public String[] getItems() {
-        String[] items = new String[list.size()];
+    public String[] getAllItemsName() {
+        String[] names = new String[list.size()];
         for(int i = 0; i < list.size(); i++) {
-            items[i] = list.get(i).toString();
+            names[i] = list.get(i).toString();
         }
-        return items;
+        return names;
     }
 
     @Override
