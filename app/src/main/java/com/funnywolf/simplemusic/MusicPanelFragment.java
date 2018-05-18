@@ -73,13 +73,13 @@ public class MusicPanelFragment extends Fragment
         if (music != null) {
             if(lastMusic != music) {
                 panelTitle.setText(String.format(Locale.getDefault(),
-                        "%d: %s", (position + 1), music.title));
-                panelArtist.setText(music.artist);
-                panelDuration.setText(music.duration);
-                panelSeekBar.setMax(music.durationInt);
+                        "%d: %s", (position + 1), music.getTitle()));
+                panelArtist.setText(music.getArtist());
+                panelDuration.setText(music.getDuration());
+                panelSeekBar.setMax(music.getDurationInt());
                 lastMusic = music;
             }
-            panelSeekBar.setProgress(music.currentTime);
+            panelSeekBar.setProgress(music.getCurrentTime());
         } else {
             panelTitle.setText("------");
             panelArtist.setText("------");

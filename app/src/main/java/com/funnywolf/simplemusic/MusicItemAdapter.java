@@ -61,8 +61,8 @@ public class MusicItemAdapter extends BaseAdapter {
 
         MusicItem music = mList.get(i);
         viewHolder.musicNum.setText(String.valueOf(i + 1));
-        viewHolder.musicTitle.setText(music.title);
-        viewHolder.musicName.setText(music.name);
+        viewHolder.musicTitle.setText(music.getTitle());
+        viewHolder.musicName.setText(music.getName());
 
         return view;
     }

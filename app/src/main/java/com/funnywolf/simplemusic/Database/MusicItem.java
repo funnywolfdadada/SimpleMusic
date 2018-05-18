@@ -7,16 +7,16 @@ import java.util.Locale;
  */
 
 public class MusicItem {
-    public final long id;
-    public final String name;
-    public final String title;
-    public final String artist;
-    public final String path;
-    public final String duration;
-    public final int durationInt;
-    public final String size;
+    private final long id;
+    private final String name;
+    private final String title;
+    private final String artist;
+    private final String path;
+    private final String duration;
+    private final int durationInt;
+    private final String size;
 
-    public int currentTime;
+    private int currentTime;
 
     public MusicItem(long id, String name, String title, String artist,
                      String path, int duration, long size){
@@ -32,6 +32,46 @@ public class MusicItem {
         this.size = String.format(Locale.getDefault(),
                 "%.2fMB", size / 1024d / 1024d);
         currentTime = 0;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getCurrentTime() {
+        return currentTime;
+    }
+
+    public int getDurationInt() {
+        return durationInt;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setCurrentTime(int currentTime) {
+        this.currentTime = currentTime;
     }
 
     @Override

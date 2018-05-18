@@ -120,8 +120,8 @@ public class MusicService extends Service {
             playing = mMusicControlBinder.isPlaying();
         }
         if(music != null) {
-            mRemoteViews.setTextViewText(R.id.panel_title, music.title);
-            mRemoteViews.setTextViewText(R.id.panel_artist, music.artist);
+            mRemoteViews.setTextViewText(R.id.panel_title, music.getTitle());
+            mRemoteViews.setTextViewText(R.id.panel_artist, music.getArtist());
         }else {
             mRemoteViews.setTextViewText(R.id.panel_title, "------");
             mRemoteViews.setTextViewText(R.id.panel_artist, "------");
@@ -213,7 +213,7 @@ public class MusicService extends Service {
         @Override
         public MusicItem getCurrentMusic() {
             if(mCurrentMusic != null)
-                mCurrentMusic.currentTime = mMediaPlayer.getCurrentPosition();
+                mCurrentMusic.setCurrentTime(mMediaPlayer.getCurrentPosition());
             return mCurrentMusic;
         }
 
@@ -224,8 +224,8 @@ public class MusicService extends Service {
             mMediaPlayer.reset();
             try {
                 MusicItem music = mMusicList.get(mCurrentPosition);
-                music.currentTime = 0;
-                mMediaPlayer.setDataSource(music.path);
+                music.setCurrentTime(0);
+                mMediaPlayer.setDataSource(music.getPath());
                 mMediaPlayer.prepare();
                 mCurrentMusic = music;
             } catch (IOException e) {
@@ -277,7 +277,7 @@ public class MusicService extends Service {
         public void seekTo(int msec) {
             if(mCurrentMusic == null)
                 return;
-            mCurrentMusic.currentTime = msec;
+            mCurrentMusic.setCurrentTime(msec);
             mMediaPlayer.seekTo(msec);
         }
 

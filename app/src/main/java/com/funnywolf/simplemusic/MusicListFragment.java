@@ -31,16 +31,13 @@ public class MusicListFragment extends Fragment
 
     private MusicListCallback mMusicListCallback;
 
-    private boolean inMusicList = false;
-
-    private MusicList<MusicList<MusicItem>> mMusicLists = new MusicList<>("SimpleMusic");
-
-    private MusicList<MusicItem> mCurrentMusicList;
-    private MusicList<MusicItem> mPlayingMusicList;
+    static private boolean inMusicList = false;
+    static private MusicList<MusicList<MusicItem>> mMusicLists;
+    static private MusicList<MusicItem> mCurrentMusicList;
+    static private MusicList<MusicItem> mPlayingMusicList;
 
     private MusicListAdapter mMusicListAdapter;
     private MusicItemAdapter mMusicItemAdapter;
-
 
     @Nullable
     @Override
@@ -59,7 +56,8 @@ public class MusicListFragment extends Fragment
 
         mMusicListCallback = (MusicListCallback) getActivity();
 
-        loadMusicList();
+        if(mMusicLists == null)
+            loadMusicList();
 
         mMusicListAdapter = new MusicListAdapter(getActivity(), mMusicLists);
         mMusicItemAdapter = new MusicItemAdapter(getActivity(), mPlayingMusicList);
@@ -113,6 +111,8 @@ public class MusicListFragment extends Fragment
     }
 
     private void loadMusicList() {
+        mMusicLists = new MusicList<>("SimpleMusic");
+
         MusicList<MusicItem> listItem = new MusicList<>("所有歌曲");
         Utility.getAllMusic(getActivity(), listItem);
         mMusicLists.add(listItem);
@@ -136,7 +136,8 @@ public class MusicListFragment extends Fragment
         mPlayingMusicList.setPlaying(true);
     }
 
-    private void saveMusicList() {
+    private boolean addMusicList(MusicList<MusicItem> list) {
+        return false;
     }
 
     public boolean onBackTouch() {
@@ -149,7 +150,7 @@ public class MusicListFragment extends Fragment
     }
 
     public void musicServiceConnected() {
-        mMusicListCallback.onMusicListPrepare(mCurrentMusicList, 0);
+        mMusicListCallback.onMusicListPrepare(mPlayingMusicList, 0);
     }
 
 
