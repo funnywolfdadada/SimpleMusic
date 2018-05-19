@@ -149,14 +149,17 @@ public class MusicListFragment extends Fragment
                                         addMusicItemDialog.show();
                                         break;
                                     case 2:
-                                        Toast.makeText(getActivity(), String.format(Locale.getDefault(),
-                                                "文件名: %s\n歌名: %s\n歌手: %s\n大小: %s\n时长: %s",
-                                                mLongClickMusicItem.getName(),
-                                                mLongClickMusicItem.getTitle(),
-                                                mLongClickMusicItem.getArtist(),
-                                                mLongClickMusicItem.getSize(),
-                                                mLongClickMusicItem.getDuration()
-                                        ), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getActivity(),
+                                                String.format(Locale.getDefault(),
+                                                "文件名: %s\n歌名: %s\n歌手: %s\n大小: %s\n" +
+                                                        "时长: %s\n路径%s",
+                                                        mLongClickMusicItem.getName(),
+                                                        mLongClickMusicItem.getTitle(),
+                                                        mLongClickMusicItem.getArtist(),
+                                                        mLongClickMusicItem.getSize(),
+                                                        mLongClickMusicItem.getDuration(),
+                                                        mLongClickMusicItem.getPath()
+                                            ), Toast.LENGTH_LONG).show();
                                         break;
                                     default:
                                         break;

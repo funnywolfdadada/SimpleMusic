@@ -59,16 +59,17 @@ public class MusicListAdapter extends BaseAdapter {
         }
 
         MusicList list = mList.get(i);
-        viewHolder.listNum.setText(String.valueOf(i + 1));
-        viewHolder.listName.setText(list.getName());
-        viewHolder.listCapacity.setText(String.format(Locale.getDefault(),
-                "共 %d 首", list.size()));
-        if(list.isPlaying()) {
-            viewHolder.listPlaying.setVisibility(View.VISIBLE);
-        }else {
-            viewHolder.listPlaying.setVisibility(View.INVISIBLE);
+        if(list != null) {
+            viewHolder.listNum.setText(String.valueOf(i + 1));
+            viewHolder.listName.setText(list.getName());
+            viewHolder.listCapacity.setText(String.format(Locale.getDefault(),
+                    "共 %d 首", list.size()));
+            if (list.isPlaying()) {
+                viewHolder.listPlaying.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.listPlaying.setVisibility(View.INVISIBLE);
+            }
         }
-
         return view;
     }
 

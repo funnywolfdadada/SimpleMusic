@@ -222,21 +222,24 @@ public class MusicService extends Service {
             isPlaying = false;
             mCurrentMusic = null;
             mMediaPlayer.reset();
-            try {
-                MusicItem music = mMusicList.get(mCurrentPosition);
+            MusicItem music = mMusicList.get(mCurrentPosition);
+            if(music != null) {
                 music.setCurrentTime(0);
-                mMediaPlayer.setDataSource(music.getPath());
-                mMediaPlayer.prepare();
-                mCurrentMusic = music;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }finally {
-                updateNotification();
+                try {
+                    mMediaPlayer.setDataSource(music.getPath());
+                    mMediaPlayer.prepare();
+                    mCurrentMusic = music;
+                } catch (IOException e) {
+                    mCurrentMusic = null;
+                }
             }
+            updateNotification();
         }
 
         @Override
         public void play() {
+            if(mCurrentMusic == null)
+                return;
             mMediaPlayer.start();
             isPlaying = true;
             updateNotification();

@@ -4,13 +4,15 @@ import com.funnywolf.simplemusic.Database.MusicItem;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class MusicList<T> {
     private String name;
     private boolean isPlaying;
     private ArrayList<T> list = new ArrayList<>();
-    private Set<String> set = new HashSet<>();
+    private Map<String, T> map = new LinkedHashMap<>();
 
     public MusicList(String name) {
         this.name = name;
@@ -37,11 +39,13 @@ public class MusicList<T> {
     }
 
     public T get(int position) {
-        return list.get(position);
+        if(list.size() > position)
+            return list.get(position);
+        return null;
     }
 
     public boolean contains(String name) {
-        return set.contains(name);
+        return map.containsKey(name);
     }
 
     public int indexOf(T item) {
@@ -50,9 +54,9 @@ public class MusicList<T> {
 
     public boolean add(T item) {
         String name;
-        if(item == null || set.contains(name = item.toString()))
+        if(item == null || map.containsKey(name = item.toString()))
             return false;
-        set.add(name);
+        map.put(name, item);
         list.add(item);
         return true;
     }
@@ -61,21 +65,21 @@ public class MusicList<T> {
         if (item == null)
             return;
         list.remove(item);
-        set.remove(item.toString());
+        map.remove(item.toString());
     }
 
     public void remove(int position) {
         if(position < 0 || position >= list.size())
             return;
-        set.remove(list.get(position).toString());
+        map.remove(list.get(position).toString());
         list.remove(position);
     }
 
     public boolean rename(int position, String name) {
-        if(position < 0 || position >= list.size() || set.contains(name))
+        if(position < 0 || position >= list.size() || map.containsKey(name))
             return false;
-        set.remove(list.get(position).toString());
-        set.add(name);
+        map.remove(list.get(position).toString());
+        map.put(name, list.get(position));
         return true;
     }
 

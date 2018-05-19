@@ -81,6 +81,7 @@ public class MusicPanelFragment extends Fragment
             }
             panelSeekBar.setProgress(music.getCurrentTime());
         } else {
+            lastMusic = null;
             panelTitle.setText("------");
             panelArtist.setText("------");
             panelDuration.setText("00:00");
