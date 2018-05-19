@@ -72,13 +72,13 @@ public class MusicPanelFragment extends Fragment
                                          MusicControl.PlayMode mode, boolean playing) {
         if (music != null) {
             if(lastMusic != music) {
-                panelTitle.setText(String.format(Locale.getDefault(),
-                        "%d: %s", (position + 1), music.getTitle()));
                 panelArtist.setText(music.getArtist());
                 panelDuration.setText(music.getDuration());
                 panelSeekBar.setMax(music.getDurationInt());
                 lastMusic = music;
             }
+            panelTitle.setText(String.format(Locale.getDefault(),
+                    "%d: %s", (position + 1), music.getTitle()));
             panelSeekBar.setProgress(music.getCurrentTime());
         } else {
             lastMusic = null;

@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,9 +20,6 @@ import com.funnywolf.simplemusic.Database.MusicItem;
 import com.funnywolf.simplemusic.Database.MusicList;
 import com.funnywolf.simplemusic.Util.Utility;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 public class MusicListFragment extends Fragment
@@ -79,7 +75,7 @@ public class MusicListFragment extends Fragment
                             Toast.makeText(getActivity(), name + "已经存在！", Toast.LENGTH_SHORT).show();
                         }else {
                             mMusicLists.add(new MusicList<MusicItem>(name));
-                            updateFragment();
+                            updateList();
                         }
                     }
                 })
@@ -103,7 +99,7 @@ public class MusicListFragment extends Fragment
                             }else {
                                 Toast.makeText(getActivity(), "该名字已存在", Toast.LENGTH_SHORT).show();
                             }
-                            updateFragment();
+                            updateList();
                         }
                     }
                 })
@@ -114,7 +110,7 @@ public class MusicListFragment extends Fragment
                             Toast.makeText(getActivity(), "无法删除该歌单！", Toast.LENGTH_SHORT).show();
                         }else {
                             mMusicLists.remove(mLongClickMusicList);
-                            updateFragment();
+                            updateList();
                         }
                     }
                 })
@@ -133,7 +129,13 @@ public class MusicListFragment extends Fragment
                                                     Toast.LENGTH_SHORT).show();
                                         }else {
                                             mCurrentMusicList.remove(mLongClickMusicItem);
-                                            updateFragment();
+                                            if(mCurrentMusicList == mPlayingMusicList) {
+                                                mMusicListCallback.onMusicListChange(
+                                                        mPlayingMusicList,
+                                                        mPlayingMusicList
+                                                                .indexOf(mLongClickMusicItem));
+                                            }
+                                            updateList();
                                         }
                                         break;
                                     case 1:
@@ -188,7 +190,7 @@ public class MusicListFragment extends Fragment
         mMusicListView.setOnItemLongClickListener(this);
         mMusicListView.setOnTouchListener(this);
 
-        updateFragment();
+        updateList();
         return view;
     }
 
@@ -219,7 +221,7 @@ public class MusicListFragment extends Fragment
         }else {
             inMusicList = true;
             mCurrentMusicList = mMusicLists.get(position);
-            updateFragment();
+            updateList();
         }
     }
 
@@ -251,7 +253,7 @@ public class MusicListFragment extends Fragment
         mPlayingMusicList.setPlaying(true);
     }
 
-    private void updateFragment() {
+    private void updateList() {
         if(inMusicList) {
             mMusicItemAdapter.setList(mCurrentMusicList);
             mMusicListView.setAdapter(mMusicItemAdapter);
@@ -271,7 +273,7 @@ public class MusicListFragment extends Fragment
     public boolean onBackTouch() {
         if(inMusicList) {
             inMusicList = false;
-            updateFragment();
+            updateList();
             return false;
         }
         return true;
@@ -314,6 +316,7 @@ public class MusicListFragment extends Fragment
     }
 
     public interface MusicListCallback {
+        void onMusicListChange(MusicList<MusicItem> list, int position);
         void onMusicListPrepare(MusicList<MusicItem> list, int position);
         void onMusicItemClick(MusicList<MusicItem> list, int position);
         void onSlideDirectionChange(boolean slideUp);

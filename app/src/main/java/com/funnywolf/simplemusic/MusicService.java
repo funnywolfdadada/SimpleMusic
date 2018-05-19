@@ -157,6 +157,11 @@ public class MusicService extends Service {
 
         private void updatePosition(boolean next) {
             int size = mMusicList.size();
+            if(size == 0) {
+                mCurrentPosition = 0;
+                mCurrentMusic = null;
+                return;
+            }
             switch (mPlayMode) {
                 case LIST_LOOP_MODE:
                     mCurrentPosition = next ? mCurrentPosition + 1 : mCurrentPosition - 1;

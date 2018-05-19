@@ -39,9 +39,10 @@ public class MusicList<T> {
     }
 
     public T get(int position) {
-        if(list.size() > position)
-            return list.get(position);
-        return null;
+        if(position < 0 || position >= list.size())
+            return null;
+        return list.get(position);
+
     }
 
     public boolean contains(String name) {

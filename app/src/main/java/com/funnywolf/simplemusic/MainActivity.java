@@ -183,6 +183,16 @@ public class MainActivity extends AppCompatActivity
      * for MusicListFragment.MusicListCallback
      */
     @Override
+    public void onMusicListChange(MusicList<MusicItem> list, int position) {
+        if (mMusicController == null)
+            return;
+        if(mMusicController.getCurrentPosition() > position) {
+            mMusicController.setCurrentPosition(mMusicController.getCurrentPosition() - 1);
+            onPanelUpdate();
+        }
+    }
+
+    @Override
     public void onMusicListPrepare(MusicList<MusicItem> list, int position) {
         if (mMusicController == null)
             return;
