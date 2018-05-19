@@ -132,7 +132,7 @@ public class Utility {
                         null, null, null,
                         MediaStore.Audio.Media.DATE_ADDED);
         if(cursor != null && cursor.moveToLast()) {
-            while(!cursor.isBeforeFirst()){
+            do {
                 long id = cursor.getLong(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
                 String name = cursor.getString(
@@ -148,8 +148,7 @@ public class Utility {
                 Long size = cursor.getLong(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
                 list.add(new MusicItem(id, name, title, artist, path, duration, size));
-                cursor.moveToPrevious();
-            }
+            }while(cursor.moveToPrevious());
             cursor.close();
         }
     }

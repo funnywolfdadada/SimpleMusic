@@ -76,6 +76,6 @@ public class MusicItem {
 
     @Override
     public String toString() {
-        return title;
+        return name;
     }
 }

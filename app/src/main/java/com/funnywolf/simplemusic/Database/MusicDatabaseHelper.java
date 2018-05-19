@@ -7,8 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class MusicDatabaseHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "SimpleMusic.db";
-    public static final String CREATE_DATABASE = "create table  SimpleMusic"
-            + "(id integer primary key autoincrement, list text, name text)";
+    public static final String TABLE_NAME = "SimpleMusic";
+    private static final String CREATE_DATABASE = "create table SimpleMusic"
+            + "(id integer primary key autoincrement, list text, item text)";
 
 
     public MusicDatabaseHelper(Context context, String name,

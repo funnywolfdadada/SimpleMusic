@@ -45,6 +45,13 @@ public class MusicList<T> {
 
     }
 
+    public T get(String name) {
+        if(name != null && map.containsKey(name)) {
+            return map.get(name);
+        }
+        return null;
+    }
+
     public boolean contains(String name) {
         return map.containsKey(name);
     }

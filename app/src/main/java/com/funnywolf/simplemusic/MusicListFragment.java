@@ -1,10 +1,14 @@
 package com.funnywolf.simplemusic;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.funnywolf.simplemusic.Database.MusicDatabaseHelper;
 import com.funnywolf.simplemusic.Database.MusicItem;
 import com.funnywolf.simplemusic.Database.MusicList;
 import com.funnywolf.simplemusic.Util.Utility;
@@ -34,10 +39,10 @@ public class MusicListFragment extends Fragment
 
     private MusicListCallback mMusicListCallback;
 
-    static private boolean inMusicList = false;
+    private boolean inMusicList = false;
     static private MusicList<MusicList<MusicItem>> mMusicLists;
-    static private MusicList<MusicItem> mCurrentMusicList;
-    static private MusicList<MusicItem> mPlayingMusicList;
+    private MusicList<MusicItem> mCurrentMusicList;
+    private MusicList<MusicItem> mPlayingMusicList;
 
     private MusicListAdapter mMusicListAdapter;
     private MusicItemAdapter mMusicItemAdapter;
@@ -49,11 +54,18 @@ public class MusicListFragment extends Fragment
     private AlertDialog musicItemLongClickDialog;
     private AlertDialog.Builder addMusicItemDialog;
 
+
+    private MusicDatabaseHelper mMusicDatabaseHelper;
+
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mMusicListCallback = (MusicListCallback) getActivity();
+
+        mMusicDatabaseHelper = new MusicDatabaseHelper(getContext(),
+                MusicDatabaseHelper.DATABASE_NAME, null, 1);
 
         if(mMusicLists == null)
             loadMusicList();
@@ -174,6 +186,12 @@ public class MusicListFragment extends Fragment
                 .setTitle("添加到");
     }
 
+    @Override
+    public void onPause() {
+        saveMusicList();
+        super.onPause();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -242,15 +260,60 @@ public class MusicListFragment extends Fragment
     }
 
     private void loadMusicList() {
-        mMusicLists = new MusicList<>("SimpleMusic");
+        mMusicLists = new MusicList<>("所有歌单");
 
-        MusicList<MusicItem> listItem = new MusicList<>("所有歌曲");
-        Utility.getAllMusic(getActivity(), listItem);
-        mMusicLists.add(listItem);
-        mPlayingMusicList = listItem;
-        mCurrentMusicList = listItem;
+        mCurrentMusicList = new MusicList<>("所有歌曲");
+        Utility.getAllMusic(getActivity(), mCurrentMusicList);
+        mMusicLists.add(mCurrentMusicList);
 
+        mPlayingMusicList = mCurrentMusicList;
         mPlayingMusicList.setPlaying(true);
+
+        SQLiteDatabase db = mMusicDatabaseHelper.getReadableDatabase();
+        Cursor cursor = db.query(MusicDatabaseHelper.TABLE_NAME, null,
+                "list=?",
+                new String[]{"所有歌单"},
+                null, null, null);
+        if(cursor.moveToFirst()) {
+            do{
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("item"));
+                mMusicLists.add(new MusicList<MusicItem>(name));
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        for(int i = 1; i < mMusicLists.size(); i++) {
+            MusicList<MusicItem> list = mMusicLists.get(i);
+            cursor = db.query(MusicDatabaseHelper.TABLE_NAME, null,
+                    "list = ?",
+                    new String[]{list.toString()},
+                    null, null, null);
+            if(cursor.moveToFirst()) {
+                do{
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow("item"));
+                    list.add(mCurrentMusicList.get(name));
+                }while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+    }
+
+    private void saveMusicList() {
+        SQLiteDatabase db = mMusicDatabaseHelper.getWritableDatabase();
+        db.delete(MusicDatabaseHelper.TABLE_NAME, null, null);
+        ContentValues values = new ContentValues();
+        for(int i = 1; i < mMusicLists.size(); i++) {
+            MusicList<MusicItem> list = mMusicLists.get(i);
+            values.put("list", mMusicLists.toString());
+            values.put("item", list.toString());
+            db.insert(MusicDatabaseHelper.TABLE_NAME, null, values);
+            //Log.d(TAG, "saveMusicList: " + mMusicLists.toString() + ", " + list.toString());
+            for(int j = 0; j < list.size(); j++) {
+                values.put("list", list.toString());
+                values.put("item", list.get(j).toString());
+                db.insert(MusicDatabaseHelper.TABLE_NAME, null, values);
+                //Log.d(TAG, "saveMusicList: " + list.toString() + ", " + list.get(j).toString());
+            }
+        }
     }
 
     private void updateList() {
@@ -282,7 +345,6 @@ public class MusicListFragment extends Fragment
     public void musicServiceConnected() {
         mMusicListCallback.onMusicListPrepare(mPlayingMusicList, 0);
     }
-
 
     /**
      * last slide direction
