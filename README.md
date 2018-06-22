@@ -16,6 +16,7 @@
   功能比较简单，启动时会自动搜索手机上所有mp3文件，生成一个“所有歌曲”的歌单;支持创建、删除和重命名歌单;
   支持歌单歌曲（“所有歌曲”除外）的添加删除;支持图库和Bing美图来设置背景;支持通知栏显示歌曲信息，控制歌曲上一曲、暂停/播放和下一曲
   暂未实现对耳机插拔和音乐焦点事件的处理。
+![](/SimpleMusicScreenshot1.jpg "截图1"){:class="img-responsive"}
 ![](/SimpleMusicScreenshot1.jpg "截图1"){:height="30%" width="30%"}
 ![](/SimpleMusicScreenshot2.jpg "截图2"){:height="30%" width="30%"}
 ![](/SimpleMusicScreenshot3.jpg "截图3"){:height="30%" width="30%"}
